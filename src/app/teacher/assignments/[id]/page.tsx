@@ -27,7 +27,7 @@ export default function TeacherAssignmentDetail() {
     const [gradingId, setGradingId] = useState<string | null>(null);
     const [drafts, setDrafts] = useState<Record<string, GradeDraft>>({});
 
-    const getAuthHeaders = () => {
+    const getAuthHeaders = (): Record<string, string> => {
         if (typeof window === 'undefined') return {};
         const token = localStorage.getItem('token');
         return token ? { Authorization: `Bearer ${token}` } : {};
@@ -68,15 +68,16 @@ export default function TeacherAssignmentDetail() {
     }, [assignmentId, authLoading, isAuthenticated, router, user]);
 
     const handleDraftChange = (submissionId: string, patch: Partial<GradeDraft>) => {
-        setDrafts((prev) => ({
-            ...prev,
-            [submissionId]: {
-                grade: '',
-                teacherComment: '',
-                ...prev[submissionId],
-                ...patch,
-            }
-        }));
+        setDrafts((prev) => {
+            const current = prev[submissionId] ?? { grade: '', teacherComment: '' };
+            return {
+                ...prev,
+                [submissionId]: {
+                    ...current,
+                    ...patch,
+                },
+            };
+        });
     };
 
     const handleGrade = async (submissionId: string) => {

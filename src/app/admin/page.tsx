@@ -52,10 +52,14 @@ export default function AdminDashboard() {
         password: '',
     });
 
-    const getAuthHeaders = () => {
+    const getAuthHeaders = (): Record<string, string> => {
         if (typeof window === 'undefined') return {};
         const token = localStorage.getItem('token');
-        return token ? { Authorization: `Bearer ${token}` } : {};
+        const headers: Record<string, string> = {};
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+        return headers;
     };
 
     useEffect(() => {

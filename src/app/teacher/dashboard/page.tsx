@@ -36,7 +36,7 @@ export default function TeacherDashboard() {
     const [loading, setLoading] = useState(true);
     const [seeding, setSeeding] = useState(false);
 
-    const getAuthHeaders = () => {
+    const getAuthHeaders = (): Record<string, string> => {
         if (typeof window === 'undefined') return {};
         const token = localStorage.getItem('token');
         return token ? { Authorization: `Bearer ${token}` } : {};

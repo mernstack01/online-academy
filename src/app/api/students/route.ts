@@ -23,7 +23,7 @@ export const GET = withAuth(async (req, { user }) => {
 
         if (user.role === UserRole.TEACHER) {
             const courses = await Course.find({ instructor: user.id }).select('_id');
-            const courseIds = courses.map((c) => c._id);
+            const courseIds = courses.map((c) => c._id.toString());
             if (courseIds.length === 0) {
                 return NextResponse.json([]);
             }

@@ -55,7 +55,7 @@ export const POST = withAuth(async (req, { user }) => {
     dueDate.setDate(dueDate.getDate() + 7);
 
     await Assignment.create({
-        courseId: course._id,
+        courseId: course._id.toString(),
         title: 'Demo Assignment: Your First Project',
         description: 'Share a link to your first project and write a short reflection.',
         dueDate,

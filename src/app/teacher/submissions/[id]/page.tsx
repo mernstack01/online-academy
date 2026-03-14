@@ -21,7 +21,7 @@ export default function TeacherSubmissionDetail() {
     const [teacherComment, setTeacherComment] = useState('');
     const [saving, setSaving] = useState(false);
 
-    const getAuthHeaders = () => {
+    const getAuthHeaders = (): Record<string, string> => {
         if (typeof window === 'undefined') return {};
         const token = localStorage.getItem('token');
         return token ? { Authorization: `Bearer ${token}` } : {};

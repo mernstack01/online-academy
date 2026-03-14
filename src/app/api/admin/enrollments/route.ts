@@ -48,8 +48,8 @@ export const POST = withAuth(async (req) => {
         }
 
         const existingEnrollment = await Enrollment.findOne({
-            studentId: student._id,
-            courseId,
+            studentId: student._id.toString(),
+            courseId: courseId.toString(),
         });
 
         if (existingEnrollment) {
@@ -57,8 +57,8 @@ export const POST = withAuth(async (req) => {
         }
 
         const enrollment = await Enrollment.create({
-            studentId: student._id,
-            courseId,
+            studentId: student._id.toString(),
+            courseId: courseId.toString(),
             status: 'active',
         });
 

@@ -71,7 +71,7 @@ export default function TeacherCourseEditor() {
         dueDate: '',
     });
 
-    const getAuthHeaders = () => {
+    const getAuthHeaders = (): Record<string, string> => {
         if (typeof window === 'undefined') return {};
         const token = localStorage.getItem('token');
         return token ? { Authorization: `Bearer ${token}` } : {};
@@ -206,17 +206,21 @@ export default function TeacherCourseEditor() {
     };
 
     const handleLessonChange = (moduleId: string, patch: Partial<LessonForm>) => {
-        setLessonForms((prev) => ({
-            ...prev,
-            [moduleId]: {
+        setLessonForms((prev) => {
+            const current = prev[moduleId] ?? {
                 title: '',
                 description: '',
                 videoUrl: '',
                 content: '',
-                ...prev[moduleId],
-                ...patch,
-            },
-        }));
+            };
+            return {
+                ...prev,
+                [moduleId]: {
+                    ...current,
+                    ...patch,
+                },
+            };
+        });
     };
 
     const handleAddLesson = async (moduleId: string) => {
