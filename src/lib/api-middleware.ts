@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { verifyToken } from './auth-utils';
-import { UserRole } from '../types';
+import { verifyToken } from '@/lib/auth-utils';
+import { UserRole } from '@/types';
 
 export type AuthenticatedHandler = (
     req: Request,

@@ -3,9 +3,18 @@
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/types';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Navbar() {
     const { user, logout } = useAuth();
+    const dashboardHref =
+        user?.role === UserRole.ADMIN
+            ? '/admin'
+            : user?.role === UserRole.TEACHER
+                ? '/teacher/dashboard'
+                : user?.role === UserRole.STUDENT
+                    ? '/student/dashboard'
+                    : null;
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 glass">
@@ -16,7 +25,7 @@ export default function Navbar() {
                             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform">
                                 A
                             </div>
-                            <span className="text-xl font-bold tracking-tight text-white">
+                            <span className="text-xl font-bold tracking-tight text-foreground">
                                 Online<span className="text-primary">Academy</span>
                             </span>
                         </Link>
@@ -24,11 +33,11 @@ export default function Navbar() {
 
                     <div className="hidden md:block">
                         <div className="ml-10 flex items-baseline space-x-4">
-                            <Link href="/courses" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <Link href="/courses" className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors">
                                 Courses
                             </Link>
-                            {user?.role === UserRole.ADMIN && (
-                                <Link href="/admin" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            {dashboardHref && (
+                                <Link href={dashboardHref} className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors">
                                     Dashboard
                                 </Link>
                             )}
@@ -36,14 +45,15 @@ export default function Navbar() {
                     </div>
 
                     <div className="flex items-center gap-4">
+                        <ThemeToggle />
                         {user ? (
                             <div className="flex items-center gap-4">
-                                <span className="text-sm text-gray-400 hidden sm:inline">
-                                    Hi, <span className="text-white font-medium">{user.name}</span>
+                                <span className="text-sm text-muted-foreground hidden sm:inline">
+                                    Hi, <span className="text-foreground font-medium">{user.name}</span>
                                 </span>
                                 <button
                                     onClick={logout}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/10"
+                                    className="px-4 py-2 text-sm font-medium text-foreground bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/10"
                                 >
                                     Log out
                                 </button>
@@ -52,7 +62,7 @@ export default function Navbar() {
                             <div className="flex items-center gap-2">
                                 <Link
                                     href="/login"
-                                    className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
+                                    className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                                 >
                                     Login
                                 </Link>

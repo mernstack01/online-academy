@@ -41,8 +41,8 @@ export default function LoginPage() {
         <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full glass p-8 rounded-2xl animate-fade-in">
                 <div className="text-center mb-10">
-                    <h2 className="text-3xl font-extrabold text-white">Welcome Back</h2>
-                    <p className="mt-2 text-sm text-gray-400">
+                    <h2 className="text-3xl font-extrabold text-foreground">Welcome Back</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">
                         Please enter your credentials to access your account
                     </p>
                 </div>
@@ -55,20 +55,20 @@ export default function LoginPage() {
                     )}
 
                     <div className="space-y-1">
-                        <label className="text-sm font-medium text-gray-300 ml-1">Email address</label>
+                        <label className="text-sm font-medium text-muted-foreground ml-1">Email address</label>
                         <input
                             type="email"
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                             placeholder="you@example.com"
                         />
                     </div>
 
                     <div className="space-y-1">
                         <div className="flex items-center justify-between ml-1">
-                            <label className="text-sm font-medium text-gray-300">Password</label>
+                            <label className="text-sm font-medium text-muted-foreground">Password</label>
                             <Link href="#" className="text-xs text-primary hover:text-primary-hover transition-colors">
                                 Forgot password?
                             </Link>
@@ -78,7 +78,7 @@ export default function LoginPage() {
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                             placeholder="••••••••"
                         />
                     </div>
@@ -93,7 +93,7 @@ export default function LoginPage() {
                 </form>
 
                 <div className="mt-8 text-center">
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                         Don't have an account?{' '}
                         <Link href="/register" className="font-medium text-primary hover:text-primary-hover transition-colors">
                             Sign up for free

@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { User as UserInterface, UserRole } from '../types';
+import { User as UserInterface, UserRole } from '@/types';
 
 export interface IUserDocument extends Omit<UserInterface, '_id' | 'createdAt' | 'updatedAt'>, Document {
     password?: string;

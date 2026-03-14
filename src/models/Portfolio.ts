@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { IPortfolio } from '../types';
+import { IPortfolio } from '@/types';
 
 export interface IPortfolioDocument extends Omit<IPortfolio, '_id' | 'createdAt' | 'updatedAt'>, Document { }
 

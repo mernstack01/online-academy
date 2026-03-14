@@ -1,7 +1,7 @@
-import dbConnect from '../lib/db';
-import Assignment from '../models/Assignment';
-import Submission from '../models/Submission';
-import { IAssignment, ISubmission } from '../types';
+import dbConnect from '@/lib/db';
+import Assignment from '@/models/Assignment';
+import Submission from '@/models/Submission';
+import { IAssignment, ISubmission } from '@/types';
 
 /**
  * Assignment Services

@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { ICourse, IModule, ILesson, IResource } from '../types';
+import { ICourse, IModule, ILesson, IResource } from '@/types';
 
 export interface ICourseDocument extends Omit<ICourse, '_id' | 'createdAt' | 'updatedAt' | 'modules'>, Document {
     modules: (Omit<IModule, '_id' | 'createdAt' | 'updatedAt' | 'lessons'> & {

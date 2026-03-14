@@ -5,14 +5,15 @@ export enum UserRole {
 }
 
 export interface User {
-    _id: string;
+    _id?: string;
+    id?: string;
     name: string;
     email: string;
     password?: string;
     role: UserRole;
     image?: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface IResource {
@@ -25,7 +26,7 @@ export interface ILesson {
     title: string;
     description?: string;
     content?: string;
-    videoUrl?: string; // Vimeo URL
+    videoUrl?: string; // Vimeo or YouTube URL
     resources?: IResource[];
     order: number;
     createdAt: Date;
@@ -86,4 +87,11 @@ export interface IPortfolio {
     createdAt: Date;
     updatedAt: Date;
 }
-
+export interface IEnrollment {
+    _id: string;
+    studentId: string | User;
+    courseId: string | ICourse;
+    status: 'active' | 'completed';
+    createdAt: Date;
+    updatedAt: Date;
+}

@@ -1,6 +1,6 @@
-import dbConnect from '../lib/db';
-import Portfolio from '../models/Portfolio';
-import { IPortfolio } from '../types';
+import dbConnect from '@/lib/db';
+import Portfolio from '@/models/Portfolio';
+import { IPortfolio } from '@/types';
 
 /**
  * Portfolio Services

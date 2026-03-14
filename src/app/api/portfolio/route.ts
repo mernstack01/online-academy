@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { withAuth } from '../../../lib/api-middleware';
-import { addToPortfolio, getStudentPortfolio } from '../../../services/portfolio.service';
-import { UserRole } from '../../../types';
+import { withAuth } from '@/lib/api-middleware';
+import { addToPortfolio, getStudentPortfolio } from '@/services/portfolio.service';
+import { UserRole } from '@/types';
 
 /**
  * @route POST /api/portfolio

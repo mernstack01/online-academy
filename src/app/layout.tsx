@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import { Inter, Geist } from "next/font/google";
+import { Space_Grotesk, Sora } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-import Navbar from "../components/Navbar";
+import Navbar from "@/components/Navbar";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-const inter = Inter({ subsets: ["latin"] });
+const displayFont = Space_Grotesk({ subsets: ['latin'], variable: '--font-display' });
+const bodyFont = Sora({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   title: "LMS Platform | Learn & Grow",
@@ -20,8 +19,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
-      <body className={`${inter.className} antialiased`}>
+    <html
+      lang="en"
+      className={cn("font-sans", bodyFont.variable, displayFont.variable)}
+      suppressHydrationWarning
+    >
+      <body className={`${bodyFont.className} antialiased`} suppressHydrationWarning>
         <AuthProvider>
           <div className="bg-gradient-mesh" />
           <Navbar />

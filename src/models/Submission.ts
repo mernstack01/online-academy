@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { ISubmission } from '../types';
+import { ISubmission } from '@/types';
 
 export interface ISubmissionDocument extends Omit<ISubmission, '_id' | 'createdAt' | 'updatedAt'>, Document { }
 

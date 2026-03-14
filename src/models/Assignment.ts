@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { IAssignment } from '../types';
+import { IAssignment } from '@/types';
 
 export interface IAssignmentDocument extends Omit<IAssignment, '_id' | 'createdAt' | 'updatedAt'>, Document { }
 

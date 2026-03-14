@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { withAuth } from '../../../../lib/api-middleware';
-import { gradeSubmission } from '../../../../services/assignment.service';
-import { UserRole } from '../../../../types';
+import { withAuth } from '@/lib/api-middleware';
+import { gradeSubmission } from '@/services/assignment.service';
+import { UserRole } from '@/types';
 
 /**
  * @route PUT /api/submissions/grade

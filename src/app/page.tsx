@@ -13,10 +13,10 @@ export default function Home() {
           <h2 className="text-primary font-bold tracking-widest uppercase text-sm">
             Future of Education
           </h2>
-          <h1 className="text-5xl md:text-7xl font-black text-white leading-tight tracking-tighter">
+          <h1 className="text-5xl md:text-7xl font-black text-foreground leading-tight tracking-tighter">
             Unlock Your <span className="text-primary">Creative</span> Potential
           </h1>
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Experience a new way of learning with our high-impact courses,
             expert mentors, and a community dedicated to growth.
           </p>
@@ -32,7 +32,7 @@ export default function Home() {
           {!user && (
             <Link
               href="/register"
-              className="w-full sm:w-auto px-10 py-4 glass text-white font-bold rounded-2xl hover:bg-white/10 transition-all hover:scale-105 active:scale-95"
+              className="w-full sm:w-auto px-10 py-4 glass text-foreground font-bold rounded-2xl hover:bg-white/10 transition-all hover:scale-105 active:scale-95"
             >
               Get Started
             </Link>
@@ -44,8 +44,8 @@ export default function Home() {
             <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary text-2xl font-bold">
               ★
             </div>
-            <h3 className="text-xl font-bold text-white">Expert Tutoring</h3>
-            <p className="text-sm text-gray-400 leading-relaxed">
+            <h3 className="text-xl font-bold text-foreground">Expert Tutoring</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Learn from the best in the industry with personalized feedback loops.
             </p>
           </div>
@@ -53,8 +53,8 @@ export default function Home() {
             <div className="w-12 h-12 bg-secondary/20 rounded-2xl flex items-center justify-center text-secondary text-2xl font-bold">
               ⎙
             </div>
-            <h3 className="text-xl font-bold text-white">Flexible Learning</h3>
-            <p className="text-sm text-gray-400 leading-relaxed">
+            <h3 className="text-xl font-bold text-foreground">Flexible Learning</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Learn at your own pace with lifetime access to all course materials.
             </p>
           </div>
@@ -62,8 +62,8 @@ export default function Home() {
             <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary text-2xl font-bold">
               ∞
             </div>
-            <h3 className="text-xl font-bold text-white">Career Support</h3>
-            <p className="text-sm text-gray-400 leading-relaxed">
+            <h3 className="text-xl font-bold text-foreground">Career Support</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Get the tools you need to succeed in your professional journey.
             </p>
           </div>
