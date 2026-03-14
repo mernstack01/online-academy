@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ICourse, ILesson, IModule, UserRole } from '@/types';
+import { ICourse, ILesson, ITest, UserRole } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import LessonVideo from '@/components/LessonVideo';
 import {
@@ -14,7 +14,8 @@ import {
     Download,
     CheckCircle2,
     ArrowLeft,
-    Menu
+    Menu,
+    ClipboardCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -28,8 +29,11 @@ export default function StudentCourseView() {
     const [course, setCourse] = useState<ICourse | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedLesson, setSelectedLesson] = useState<ILesson | null>(null);
+    const [selectedTest, setSelectedTest] = useState<ITest | null>(null);
     const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [testAnswers, setTestAnswers] = useState<Record<string, number>>({});
+    const [testResult, setTestResult] = useState<{ score: number; total: number } | null>(null);
 
     const courseId = params.id as string;
 
@@ -59,9 +63,13 @@ export default function StudentCourseView() {
                     setCourse(data);
 
                     // Select first lesson by default
-                    if (data.modules?.length > 0 && data.modules[0].lessons?.length > 0) {
+                    if (data.modules?.length > 0) {
                         const firstModule = data.modules.sort((a, b) => a.order - b.order)[0];
-                        setSelectedLesson(firstModule.lessons.sort((a, b) => a.order - b.order)[0]);
+                        if (firstModule.lessons?.length > 0) {
+                            setSelectedLesson(firstModule.lessons.sort((a, b) => a.order - b.order)[0]);
+                        } else if (firstModule.tests?.length > 0) {
+                            setSelectedTest(firstModule.tests[0]);
+                        }
                         setExpandedModules({ [firstModule._id]: true });
                     }
                 }
@@ -84,6 +92,36 @@ export default function StudentCourseView() {
             ...prev,
             [moduleId]: !prev[moduleId]
         }));
+    };
+
+    const handleSelectLesson = (lesson: ILesson) => {
+        setSelectedLesson(lesson);
+        setSelectedTest(null);
+        setTestAnswers({});
+        setTestResult(null);
+    };
+
+    const handleSelectTest = (test: ITest) => {
+        setSelectedTest(test);
+        setSelectedLesson(null);
+        setTestAnswers({});
+        setTestResult(null);
+    };
+
+    const handleAnswerChange = (questionId: string, optionIndex: number) => {
+        setTestAnswers((prev) => ({ ...prev, [questionId]: optionIndex }));
+    };
+
+    const handleSubmitTest = () => {
+        if (!selectedTest) return;
+        let score = 0;
+        selectedTest.questions.forEach((question, idx) => {
+            const key = question._id?.toString() || `${idx}`;
+            if (testAnswers[key] === question.correctIndex) {
+                score += 1;
+            }
+        });
+        setTestResult({ score, total: selectedTest.questions.length });
     };
 
     if (loading) {
@@ -145,7 +183,7 @@ export default function StudentCourseView() {
                                     {module.lessons.sort((a, b) => a.order - b.order).map((lesson, lIdx) => (
                                         <button
                                             key={lesson._id}
-                                            onClick={() => setSelectedLesson(lesson)}
+                                            onClick={() => handleSelectLesson(lesson)}
                                             className={`
                                                 w-full pl-12 pr-6 py-3 flex items-center gap-3 transition-all
                                                 ${selectedLesson?._id === lesson._id
@@ -159,6 +197,27 @@ export default function StudentCourseView() {
                                             </span>
                                         </button>
                                     ))}
+                                    {module.tests?.length ? (
+                                        <div className="mt-3 space-y-1">
+                                            {module.tests.map((test) => (
+                                                <button
+                                                    key={test._id}
+                                                    onClick={() => handleSelectTest(test)}
+                                                    className={`
+                                                        w-full pl-12 pr-6 py-3 flex items-center gap-3 transition-all
+                                                        ${selectedTest?._id === test._id
+                                                            ? 'bg-primary/10 text-primary border-r-2 border-primary'
+                                                            : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}
+                                                    `}
+                                                >
+                                                    <ClipboardCheck className="h-4 w-4 flex-shrink-0" />
+                                                    <span className={`text-xs font-medium text-left truncate ${!sidebarOpen && 'lg:hidden'}`}>
+                                                        {test.title}
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    ) : null}
                                 </div>
                             )}
                         </div>
@@ -168,7 +227,71 @@ export default function StudentCourseView() {
 
             {/* Main Player Area */}
             <main className="flex-1 overflow-y-auto bg-background flex flex-col items-center">
-                {selectedLesson ? (
+                {selectedTest ? (
+                    <div className="w-full max-w-5xl py-12 px-6 md:px-12 space-y-8">
+                        <div className="flex items-center gap-3">
+                            <ClipboardCheck className="h-6 w-6 text-primary" />
+                            <h2 className="text-2xl font-black italic">{selectedTest.title}</h2>
+                        </div>
+
+                        <div className="space-y-6">
+                            {selectedTest.questions.map((question, idx) => {
+                                const qKey = question._id?.toString() || `${idx}`;
+                                return (
+                                    <div key={qKey} className="border border-white/10 bg-white/5 rounded-2xl p-6 space-y-4">
+                                        <div className="text-sm font-semibold text-muted-foreground uppercase tracking-widest">
+                                            Question {idx + 1}
+                                        </div>
+                                        <div className="text-lg font-semibold">{question.prompt}</div>
+                                        <div className="space-y-2">
+                                            {question.options.map((option, optIdx) => {
+                                                const isSelected = testAnswers[qKey] === optIdx;
+                                                const isCorrect = testResult && question.correctIndex === optIdx;
+                                                const isWrong = testResult && isSelected && question.correctIndex !== optIdx;
+                                                return (
+                                                    <label
+                                                        key={optIdx}
+                                                        className={`flex items-center gap-3 border border-white/10 rounded-xl px-4 py-3 cursor-pointer transition-all ${
+                                                            isCorrect
+                                                                ? 'bg-green-500/10 border-green-500/30 text-green-300'
+                                                                : isWrong
+                                                                ? 'bg-red-500/10 border-red-500/30 text-red-300'
+                                                                : 'hover:bg-white/10'
+                                                        }`}
+                                                    >
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${qKey}`}
+                                                            value={optIdx}
+                                                            checked={isSelected}
+                                                            onChange={() => handleAnswerChange(qKey, optIdx)}
+                                                            className="accent-primary"
+                                                        />
+                                                        <span className="text-sm">{option}</span>
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <div className="flex flex-col md:flex-row gap-4 items-center">
+                            <Button
+                                onClick={handleSubmitTest}
+                                className="bg-white text-black font-semibold hover:bg-white/90"
+                            >
+                                Submit Test
+                            </Button>
+                            {testResult ? (
+                                <div className="text-sm text-muted-foreground">
+                                    Score: <span className="text-foreground font-semibold">{testResult.score}</span> / {testResult.total}
+                                </div>
+                            ) : null}
+                        </div>
+                    </div>
+                ) : selectedLesson ? (
                     <div className="w-full max-w-5xl py-12 px-6 md:px-12 space-y-12">
                         {selectedLesson.videoUrl ? (
                             <LessonVideo
@@ -229,7 +352,7 @@ export default function StudentCourseView() {
                     <div className="flex-1 flex flex-col items-center justify-center space-y-6 text-muted-foreground">
                         <BookOpen className="h-24 w-24 opacity-5" />
                         <div className="text-center space-y-2">
-                            <h3 className="text-2xl font-black italic tracking-tighter text-muted-foreground">SELECT A LESSON</h3>
+                            <h3 className="text-2xl font-black italic tracking-tighter text-muted-foreground">SELECT A LESSON OR TEST</h3>
                             <p className="text-sm italic">Choose a topic from the curriculum to start learning.</p>
                         </div>
                     </div>

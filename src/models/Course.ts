@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { ICourse, IModule, ILesson, IResource } from '@/types';
+import { ICourse, IModule, ILesson, IResource, ITest, ITestQuestion } from '@/types';
 
 export interface ICourseDocument extends Omit<ICourse, '_id' | 'createdAt' | 'updatedAt' | 'modules'>, Document {
     modules: (Omit<IModule, '_id' | 'createdAt' | 'updatedAt' | 'lessons'> & {
@@ -7,6 +7,10 @@ export interface ICourseDocument extends Omit<ICourse, '_id' | 'createdAt' | 'up
         lessons: (Omit<ILesson, '_id' | 'createdAt' | 'updatedAt' | 'resources'> & {
             _id: mongoose.Types.ObjectId;
             resources: IResource[];
+        })[];
+        tests: (Omit<ITest, '_id' | 'createdAt' | 'updatedAt' | 'questions'> & {
+            _id: mongoose.Types.ObjectId;
+            questions: (Omit<ITestQuestion, '_id'> & { _id: mongoose.Types.ObjectId })[];
         })[];
     })[];
 }
@@ -40,6 +44,33 @@ const lessonSchema = new Schema({
     },
 }, { timestamps: true });
 
+const testQuestionSchema = new Schema({
+    prompt: {
+        type: String,
+        required: [true, 'Question prompt is required'],
+        trim: true,
+    },
+    options: {
+        type: [String],
+        required: true,
+        validate: [(val: string[]) => val.length >= 2, 'At least two options are required'],
+    },
+    correctIndex: {
+        type: Number,
+        required: true,
+        min: 0,
+    },
+}, { timestamps: true });
+
+const testSchema = new Schema({
+    title: {
+        type: String,
+        required: [true, 'Test title is required'],
+        trim: true,
+    },
+    questions: [testQuestionSchema],
+}, { timestamps: true });
+
 const moduleSchema = new Schema({
     title: {
         type: String,
@@ -47,6 +78,7 @@ const moduleSchema = new Schema({
         trim: true,
     },
     lessons: [lessonSchema],
+    tests: [testSchema],
     order: {
         type: Number,
         required: true,

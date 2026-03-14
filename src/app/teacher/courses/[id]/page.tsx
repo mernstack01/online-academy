@@ -51,7 +51,19 @@ export default function TeacherCourseEditor() {
         content: string;
     };
 
+    type TestQuestionForm = {
+        prompt: string;
+        options: string[];
+        correctIndex: number;
+    };
+
+    type TestForm = {
+        title: string;
+        questions: TestQuestionForm[];
+    };
+
     const [lessonForms, setLessonForms] = useState<Record<string, LessonForm>>({});
+    const [testForms, setTestForms] = useState<Record<string, TestForm>>({});
 
     const [assignmentForm, setAssignmentForm] = useState({
         title: '',
@@ -243,6 +255,106 @@ export default function TeacherCourseEditor() {
         }
     };
 
+    const updateTestForm = (moduleId: string, updater: (form: TestForm) => TestForm) => {
+        setTestForms((prev) => {
+            const current = prev[moduleId] || { title: '', questions: [] };
+            return { ...prev, [moduleId]: updater(current) };
+        });
+    };
+
+    const handleAddTestQuestion = (moduleId: string) => {
+        updateTestForm(moduleId, (form) => ({
+            ...form,
+            questions: [
+                ...form.questions,
+                { prompt: '', options: ['', ''], correctIndex: 0 },
+            ],
+        }));
+    };
+
+    const handleRemoveTestQuestion = (moduleId: string, qIndex: number) => {
+        updateTestForm(moduleId, (form) => ({
+            ...form,
+            questions: form.questions.filter((_, idx) => idx !== qIndex),
+        }));
+    };
+
+    const handleTestQuestionChange = (moduleId: string, qIndex: number, patch: Partial<TestQuestionForm>) => {
+        updateTestForm(moduleId, (form) => ({
+            ...form,
+            questions: form.questions.map((q, idx) => (idx === qIndex ? { ...q, ...patch } : q)),
+        }));
+    };
+
+    const handleTestOptionChange = (moduleId: string, qIndex: number, optIndex: number, value: string) => {
+        updateTestForm(moduleId, (form) => ({
+            ...form,
+            questions: form.questions.map((q, idx) => {
+                if (idx !== qIndex) return q;
+                const nextOptions = [...q.options];
+                nextOptions[optIndex] = value;
+                return { ...q, options: nextOptions };
+            }),
+        }));
+    };
+
+    const handleAddTestOption = (moduleId: string, qIndex: number) => {
+        updateTestForm(moduleId, (form) => ({
+            ...form,
+            questions: form.questions.map((q, idx) => {
+                if (idx !== qIndex) return q;
+                if (q.options.length >= 5) return q;
+                return { ...q, options: [...q.options, ''] };
+            }),
+        }));
+    };
+
+    const handleRemoveTestOption = (moduleId: string, qIndex: number, optIndex: number) => {
+        updateTestForm(moduleId, (form) => ({
+            ...form,
+            questions: form.questions.map((q, idx) => {
+                if (idx !== qIndex) return q;
+                if (q.options.length <= 2) return q;
+                const nextOptions = q.options.filter((_, oIdx) => oIdx !== optIndex);
+                const nextCorrect = Math.max(0, Math.min(q.correctIndex, nextOptions.length - 1));
+                return { ...q, options: nextOptions, correctIndex: nextCorrect };
+            }),
+        }));
+    };
+
+    const handleSaveTest = async (moduleId: string) => {
+        const form = testForms[moduleId] || { title: '', questions: [] };
+        if (!form.title.trim() || form.questions.length === 0) return;
+
+        try {
+            const res = await fetch(`/api/modules/${moduleId}/tests`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                body: JSON.stringify({
+                    title: form.title.trim(),
+                    questions: form.questions.map((q) => ({
+                        prompt: q.prompt.trim(),
+                        options: q.options.map((opt) => opt.trim()),
+                        correctIndex: q.correctIndex,
+                    })),
+                }),
+            });
+
+            if (res.ok) {
+                setTestForms((prev) => ({
+                    ...prev,
+                    [moduleId]: { title: '', questions: [] },
+                }));
+                await refreshCourse();
+            } else {
+                const data = await res.json();
+                alert(data.message || 'Failed to add test');
+            }
+        } catch (error) {
+            console.error('Add test failed:', error);
+        }
+    };
+
     const handleCreateAssignment = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!assignmentForm.title || !assignmentForm.dueDate) return;
@@ -426,67 +538,209 @@ export default function TeacherCourseEditor() {
                                 {course.modules.length === 0 && (
                                     <div className="text-muted-foreground italic">No modules yet. Add your first module above.</div>
                                 )}
-                                {course.modules.sort((a, b) => a.order - b.order).map((module) => (
-                                    <div key={module._id} className="border border-white/10 rounded-2xl overflow-hidden">
-                                        <div className="px-4 py-3 bg-white/[0.03] flex items-center justify-between">
-                                            <div className="font-semibold">{module.title}</div>
-                                            <Badge variant="outline" className="border-white/10 text-muted-foreground">
-                                                {module.lessons.length} Lessons
-                                            </Badge>
-                                        </div>
-                                        <div className="p-4 space-y-4">
-                                            <div className="space-y-3">
-                                                {module.lessons.length === 0 && (
-                                                    <div className="text-xs text-muted-foreground italic">No lessons yet.</div>
-                                                )}
-                                                {module.lessons.sort((a, b) => a.order - b.order).map((lesson) => (
-                                                    <div key={lesson._id} className="flex items-center gap-3 text-sm text-muted-foreground">
-                                                        <PlayCircle className="h-4 w-4 text-primary/70" />
-                                                        <span>{lesson.title}</span>
-                                                    </div>
-                                                ))}
+                                {course.modules.sort((a, b) => a.order - b.order).map((module) => {
+                                    const testForm = testForms[module._id] || { title: '', questions: [] };
+                                    return (
+                                        <div key={module._id} className="border border-white/10 rounded-2xl overflow-hidden">
+                                            <div className="px-4 py-3 bg-white/[0.03] flex items-center justify-between">
+                                                <div className="font-semibold">{module.title}</div>
+                                                <Badge variant="outline" className="border-white/10 text-muted-foreground">
+                                                    {module.lessons.length} Lessons
+                                                </Badge>
                                             </div>
+                                            <div className="p-4 space-y-6">
+                                                <div className="space-y-3">
+                                                    {module.lessons.length === 0 && (
+                                                        <div className="text-xs text-muted-foreground italic">No lessons yet.</div>
+                                                    )}
+                                                    {module.lessons.sort((a, b) => a.order - b.order).map((lesson) => (
+                                                        <div key={lesson._id} className="flex items-center gap-3 text-sm text-muted-foreground">
+                                                            <PlayCircle className="h-4 w-4 text-primary/70" />
+                                                            <span>{lesson.title}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                <input
-                                                    value={lessonForms[module._id]?.title || ''}
-                                                    onChange={(e) => handleLessonChange(module._id, { title: e.target.value })}
-                                                    placeholder="Lesson title"
-                                                    className="bg-card border border-white/10 rounded-lg py-2.5 px-3 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground placeholder-muted-foreground"
-                                                />
-                                                <input
-                                                    value={lessonForms[module._id]?.videoUrl || ''}
-                                                    onChange={(e) => handleLessonChange(module._id, { videoUrl: e.target.value })}
-                                                    placeholder="Vimeo or YouTube URL (optional)"
-                                                    className="bg-card border border-white/10 rounded-lg py-2.5 px-3 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground placeholder-muted-foreground"
-                                                />
-                                                <p className="md:col-span-2 text-xs text-muted-foreground">
-                                                    Only Vimeo or YouTube links are supported.
-                                                </p>
-                                                <textarea
-                                                    value={lessonForms[module._id]?.description || ''}
-                                                    onChange={(e) => handleLessonChange(module._id, { description: e.target.value })}
-                                                    placeholder="Lesson description"
-                                                    className="md:col-span-2 bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 transition-all h-20 resize-none text-foreground placeholder-muted-foreground"
-                                                />
-                                                <textarea
-                                                    value={lessonForms[module._id]?.content || ''}
-                                                    onChange={(e) => handleLessonChange(module._id, { content: e.target.value })}
-                                                    placeholder="Lesson notes / content"
-                                                    className="md:col-span-2 bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 transition-all h-24 resize-none text-foreground placeholder-muted-foreground"
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    onClick={() => handleAddLesson(module._id)}
-                                                    className="md:col-span-2 h-11 bg-white text-black font-semibold hover:bg-white/90 transition-all"
-                                                >
-                                                    <Plus className="h-4 w-4 mr-2" />
-                                                    Add Lesson
-                                                </Button>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                    <input
+                                                        value={lessonForms[module._id]?.title || ''}
+                                                        onChange={(e) => handleLessonChange(module._id, { title: e.target.value })}
+                                                        placeholder="Lesson title"
+                                                        className="bg-card border border-white/10 rounded-lg py-2.5 px-3 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground placeholder-muted-foreground"
+                                                    />
+                                                    <input
+                                                        value={lessonForms[module._id]?.videoUrl || ''}
+                                                        onChange={(e) => handleLessonChange(module._id, { videoUrl: e.target.value })}
+                                                        placeholder="Vimeo or YouTube URL (optional)"
+                                                        className="bg-card border border-white/10 rounded-lg py-2.5 px-3 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground placeholder-muted-foreground"
+                                                    />
+                                                    <p className="md:col-span-2 text-xs text-muted-foreground">
+                                                        Only Vimeo or YouTube links are supported.
+                                                    </p>
+                                                    <textarea
+                                                        value={lessonForms[module._id]?.description || ''}
+                                                        onChange={(e) => handleLessonChange(module._id, { description: e.target.value })}
+                                                        placeholder="Lesson description"
+                                                        className="md:col-span-2 bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 transition-all h-20 resize-none text-foreground placeholder-muted-foreground"
+                                                    />
+                                                    <textarea
+                                                        value={lessonForms[module._id]?.content || ''}
+                                                        onChange={(e) => handleLessonChange(module._id, { content: e.target.value })}
+                                                        placeholder="Lesson notes / content"
+                                                        className="md:col-span-2 bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 transition-all h-24 resize-none text-foreground placeholder-muted-foreground"
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        onClick={() => handleAddLesson(module._id)}
+                                                        className="md:col-span-2 h-11 bg-white text-black font-semibold hover:bg-white/90 transition-all"
+                                                    >
+                                                        <Plus className="h-4 w-4 mr-2" />
+                                                        Add Lesson
+                                                    </Button>
+                                                </div>
+
+                                                <div className="border-t border-white/10 pt-5 space-y-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="font-semibold">Module Tests</div>
+                                                        <Badge variant="outline" className="border-white/10 text-muted-foreground">
+                                                            {module.tests?.length || 0} Tests
+                                                        </Badge>
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        {module.tests?.length ? (
+                                                            module.tests.map((test) => (
+                                                                <div
+                                                                    key={test._id}
+                                                                    className="flex items-center gap-3 text-xs text-muted-foreground"
+                                                                >
+                                                                    <PlayCircle className="h-3 w-3 text-primary/70" />
+                                                                    <span>{test.title}</span>
+                                                                    <span className="text-muted-foreground/60">({test.questions.length} Q)</span>
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <div className="text-xs text-muted-foreground italic">No tests yet.</div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="space-y-3">
+                                                        <input
+                                                            value={testForm.title}
+                                                            onChange={(e) =>
+                                                                updateTestForm(module._id, (form) => ({
+                                                                    ...form,
+                                                                    title: e.target.value,
+                                                                }))
+                                                            }
+                                                            placeholder="Test title"
+                                                            className="bg-card border border-white/10 rounded-lg py-2.5 px-3 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground placeholder-muted-foreground"
+                                                        />
+
+                                                        {testForm.questions.map((question, qIdx) => (
+                                                            <div key={qIdx} className="border border-white/10 rounded-xl p-3 space-y-3">
+                                                                <div className="flex items-center justify-between">
+                                                                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                                                                        Question {qIdx + 1}
+                                                                    </div>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleRemoveTestQuestion(module._id, qIdx)}
+                                                                        className="text-xs text-red-400 hover:text-red-300"
+                                                                    >
+                                                                        Remove
+                                                                    </button>
+                                                                </div>
+                                                                <input
+                                                                    value={question.prompt}
+                                                                    onChange={(e) =>
+                                                                        handleTestQuestionChange(module._id, qIdx, { prompt: e.target.value })
+                                                                    }
+                                                                    placeholder="Question prompt"
+                                                                    className="bg-card border border-white/10 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground placeholder-muted-foreground"
+                                                                />
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                                    {question.options.map((option, optIdx) => (
+                                                                        <div key={optIdx} className="flex items-center gap-2">
+                                                                            <input
+                                                                                value={option}
+                                                                                onChange={(e) =>
+                                                                                    handleTestOptionChange(
+                                                                                        module._id,
+                                                                                        qIdx,
+                                                                                        optIdx,
+                                                                                        e.target.value
+                                                                                    )
+                                                                                }
+                                                                                placeholder={`Option ${optIdx + 1}`}
+                                                                                className="flex-1 bg-card border border-white/10 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground placeholder-muted-foreground"
+                                                                            />
+                                                                            {question.options.length > 2 ? (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() =>
+                                                                                        handleRemoveTestOption(module._id, qIdx, optIdx)
+                                                                                    }
+                                                                                    className="text-xs text-red-400 hover:text-red-300"
+                                                                                >
+                                                                                    Remove
+                                                                                </button>
+                                                                            ) : null}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                                <div className="flex flex-col md:flex-row md:items-center gap-3">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleAddTestOption(module._id, qIdx)}
+                                                                        className="text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground"
+                                                                    >
+                                                                        Add Option
+                                                                    </button>
+                                                                    <div className="text-xs text-muted-foreground">
+                                                                        Correct option:
+                                                                    </div>
+                                                                    <select
+                                                                        value={question.correctIndex}
+                                                                        onChange={(e) =>
+                                                                            handleTestQuestionChange(module._id, qIdx, {
+                                                                                correctIndex: Number(e.target.value),
+                                                                            })
+                                                                        }
+                                                                        className="bg-card border border-white/10 rounded-lg py-2 px-3 text-xs focus:outline-none focus:border-primary/50 transition-all text-foreground"
+                                                                    >
+                                                                        {question.options.map((_, optIdx) => (
+                                                                            <option key={optIdx} value={optIdx}>
+                                                                                Option {optIdx + 1}
+                                                                            </option>
+                                                                        ))}
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+
+                                                        <div className="flex flex-col md:flex-row gap-3">
+                                                            <Button
+                                                                type="button"
+                                                                onClick={() => handleAddTestQuestion(module._id)}
+                                                                className="bg-white/10 hover:bg-white/20 text-foreground border border-white/10"
+                                                            >
+                                                                Add Question
+                                                            </Button>
+                                                            <Button
+                                                                type="button"
+                                                                onClick={() => handleSaveTest(module._id)}
+                                                                className="bg-white text-black font-semibold hover:bg-white/90"
+                                                            >
+                                                                Save Test
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </CardContent>
                     </Card>

@@ -1,6 +1,6 @@
 import dbConnect from '../lib/db';
 import Course from '../models/Course';
-import { ICourse, IModule, ILesson } from '../types';
+import { ICourse, IModule, ILesson, ITest } from '../types';
 
 /**
  * Course Services
@@ -89,6 +89,23 @@ export const updateLesson = async (courseId: string, moduleId: string, lessonId:
     Object.assign(lesson, data);
     await course.save();
     return lesson;
+};
+
+/**
+ * Test Services (Embedded)
+ */
+
+export const addTest = async (courseId: string, moduleId: string, testData: Partial<ITest>) => {
+    await dbConnect();
+    const course = await Course.findById(courseId);
+    if (!course) throw new Error('Course not found');
+
+    const module = (course.modules as any).id(moduleId);
+    if (!module) throw new Error('Module not found');
+
+    module.tests.push(testData as any);
+    await course.save();
+    return module.tests[module.tests.length - 1];
 };
 
 /**

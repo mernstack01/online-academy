@@ -33,10 +33,26 @@ export interface ILesson {
     updatedAt: Date;
 }
 
+export interface ITestQuestion {
+    _id: string;
+    prompt: string;
+    options: string[];
+    correctIndex: number;
+}
+
+export interface ITest {
+    _id: string;
+    title: string;
+    questions: ITestQuestion[];
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 export interface IModule {
     _id: string;
     title: string;
     lessons: ILesson[];
+    tests: ITest[];
     order: number;
     createdAt: Date;
     updatedAt: Date;
