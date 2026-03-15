@@ -3,6 +3,7 @@ import { Space_Grotesk, Sora } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { cn } from "@/lib/utils";
 
 const displayFont = Space_Grotesk({ subsets: ['latin'], variable: '--font-display' });
@@ -31,6 +32,7 @@ export default function RootLayout({
           <main className="min-h-screen pt-20 px-4 md:px-8 max-w-7xl mx-auto">
             {children}
           </main>
+          <Footer />
         </AuthProvider>
       </body>
     </html>

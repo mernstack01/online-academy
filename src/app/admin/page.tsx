@@ -4,7 +4,15 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Select } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Users, BookOpen, GraduationCap, ClipboardCheck, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { ICourse, UserRole } from '@/types';
@@ -501,31 +509,45 @@ export default function AdminDashboard() {
                             ) : null}
 
                             <Select
-                                value={selectedStudentId}
-                                onChange={(e) => setSelectedStudentId(e.target.value)}
+                                value={selectedStudentId || null}
+                                onValueChange={(value) => setSelectedStudentId(value ?? '')}
                             >
-                                <option value="">Select a student</option>
-                                {students.map((student) => (
-                                    <option key={student._id} value={student._id}>
-                                        {student.name} — {student.email}
-                                    </option>
-                                ))}
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select a student" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Students</SelectLabel>
+                                        {students.map((student) => (
+                                            <SelectItem key={student._id} value={student._id}>
+                                                {student.name} — {student.email}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
                             </Select>
                         </div>
 
                         <div className="space-y-1">
                             <label className="text-sm font-medium text-muted-foreground ml-1">Course</label>
                             <Select
-                                value={enrollCourse}
-                                onChange={(e) => setEnrollCourse(e.target.value)}
+                                value={enrollCourse || null}
+                                onValueChange={(value) => setEnrollCourse(value ?? '')}
                                 disabled={coursesLoading}
                             >
-                                <option value="">Select a course</option>
-                                {courses.map((course) => (
-                                    <option key={course._id} value={course._id}>
-                                        {course.title} {course.price > 0 ? `($${course.price})` : '(FREE)'}
-                                    </option>
-                                ))}
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder={coursesLoading ? 'Loading courses...' : 'Select a course'} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Courses</SelectLabel>
+                                        {courses.map((course) => (
+                                            <SelectItem key={course._id} value={course._id}>
+                                                {course.title} {course.price > 0 ? `($${course.price})` : '(FREE)'}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
                             </Select>
                         </div>
 

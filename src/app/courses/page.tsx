@@ -49,7 +49,7 @@ export default function CoursesPage() {
 
             {error ? (
                 <div className="text-center py-20 glass rounded-2xl">
-                    <p className="text-red-400 text-lg italic">{error}</p>
+                    <p className="text-grey-400 text-lg italic">{error}</p>
                 </div>
             ) : courses.length === 0 ? (
                 <div className="text-center py-20 glass rounded-2xl">
@@ -82,12 +82,12 @@ export default function CoursesPage() {
                                 </div>
                             </Link>
 
-                            <div className="p-6 flex flex-col flex-grow">
+                            <div className="p-6 flex flex-col grow">
                                 <Link href={`/courses/${course._id}`} className="block">
                                     <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors mb-2 line-clamp-1">
                                         {course.title}
                                     </h3>
-                                    <p className="text-muted-foreground text-sm mb-6 line-clamp-3 flex-grow">
+                                    <p className="text-muted-foreground text-sm mb-6 line-clamp-3 grow">
                                         {course.description}
                                     </p>
                                 </Link>

@@ -7,6 +7,7 @@ import { IAssignment, ICourse, UserRole } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Link from 'next/link';
 import {
     ArrowLeft,
@@ -704,21 +705,25 @@ export default function TeacherCourseEditor() {
                                                                     <div className="text-xs text-muted-foreground">
                                                                         Correct option:
                                                                     </div>
-                                                                    <select
-                                                                        value={question.correctIndex}
-                                                                        onChange={(e) =>
+                                                                    <Select
+                                                                        value={String(question.correctIndex)}
+                                                                        onValueChange={(value) =>
                                                                             handleTestQuestionChange(module._id, qIdx, {
-                                                                                correctIndex: Number(e.target.value),
+                                                                                correctIndex: Number(value),
                                                                             })
                                                                         }
-                                                                        className="bg-card border border-white/10 rounded-lg py-2 px-3 text-xs focus:outline-none focus:border-primary/50 transition-all text-foreground"
                                                                     >
-                                                                        {question.options.map((_, optIdx) => (
-                                                                            <option key={optIdx} value={optIdx}>
-                                                                                Option {optIdx + 1}
-                                                                            </option>
-                                                                        ))}
-                                                                    </select>
+                                                                        <SelectTrigger className="h-9 w-40 bg-card border border-white/10 px-3 py-2 text-xs">
+                                                                            <SelectValue placeholder="Select option" />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            {question.options.map((_, optIdx) => (
+                                                                                <SelectItem key={optIdx} value={String(optIdx)}>
+                                                                                    Option {optIdx + 1}
+                                                                                </SelectItem>
+                                                                            ))}
+                                                                        </SelectContent>
+                                                                    </Select>
                                                                 </div>
                                                             </div>
                                                         ))}
