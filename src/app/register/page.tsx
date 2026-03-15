@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import GoogleAuthButton from '@/components/GoogleAuthButton';
 
 export default function RegisterPage() {
     const [name, setName] = useState('');
@@ -10,6 +11,7 @@ export default function RegisterPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [oauthLoading, setOauthLoading] = useState(false);
     const { login } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -35,6 +37,31 @@ export default function RegisterPage() {
             setError(err.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleGoogleCredential = async (credential: string) => {
+        setError('');
+        setOauthLoading(true);
+
+        try {
+            const res = await fetch('/api/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || 'Google sign up failed');
+            }
+
+            login(data.token, data.user);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setOauthLoading(false);
         }
     };
 
@@ -99,6 +126,19 @@ export default function RegisterPage() {
                         {loading ? 'Creating account...' : 'Create Account'}
                     </button>
                 </form>
+
+                <div className="my-6 flex items-center gap-3">
+                    <span className="h-px flex-1 bg-white/10" />
+                    <span className="text-xs uppercase tracking-widest text-muted-foreground">or</span>
+                    <span className="h-px flex-1 bg-white/10" />
+                </div>
+
+                <GoogleAuthButton onCredential={handleGoogleCredential} />
+                {oauthLoading && (
+                    <p className="mt-3 text-xs text-muted-foreground text-center">
+                        Signing up with Google...
+                    </p>
+                )}
 
                 <div className="mt-8 text-center">
                     <p className="text-sm text-muted-foreground">

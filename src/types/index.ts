@@ -12,6 +12,8 @@ export interface User {
     password?: string;
     role: UserRole;
     image?: string;
+    provider?: 'credentials' | 'google';
+    googleId?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }

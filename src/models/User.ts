@@ -24,7 +24,9 @@ const userSchema = new Schema<IUserDocument>(
         },
         password: {
             type: String,
-            required: [true, 'Please provide a password'],
+            required: function (this: IUserDocument) {
+                return this.provider === 'credentials';
+            },
             minlength: [6, 'Password must be at least 6 characters'],
             select: false, // Don't return password by default
         },
@@ -32,6 +34,14 @@ const userSchema = new Schema<IUserDocument>(
             type: String,
             enum: Object.values(UserRole),
             default: UserRole.STUDENT,
+        },
+        provider: {
+            type: String,
+            enum: ['credentials', 'google'],
+            default: 'credentials',
+        },
+        googleId: {
+            type: String,
         },
         image: {
             type: String,
@@ -44,7 +54,7 @@ const userSchema = new Schema<IUserDocument>(
 
 // Hash password before saving
 userSchema.pre('save', async function () {
-    if (!this.isModified('password')) {
+    if (!this.isModified('password') || !this.password) {
         return;
     }
 
@@ -58,6 +68,9 @@ userSchema.pre('save', async function () {
 
 // Method to compare password
 userSchema.methods.comparePassword = async function (password: string): Promise<boolean> {
+    if (!this.password) {
+        return false;
+    }
     return bcrypt.compare(password, this.password!);
 };
 

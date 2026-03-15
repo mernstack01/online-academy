@@ -42,6 +42,7 @@ export const registerUser = async (userData: any) => {
         email: normalizedEmail,
         password,
         role: UserRole.STUDENT,
+        provider: 'credentials',
     });
 
     const token = signToken(user);
@@ -99,6 +100,9 @@ export const loginUser = async (credentials: any) => {
     const user = await User.findOne({ email: normalizedEmail }).select('+password');
     if (!user) {
         throw new Error('Invalid credentials');
+    }
+    if (user.provider && user.provider !== 'credentials') {
+        throw new Error('Please sign in with Google');
     }
 
     const isMatch = await user.comparePassword(password);

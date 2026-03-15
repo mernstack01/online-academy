@@ -19,9 +19,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const googleClientId =
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+    process.env.GOOGLE_CLIENT_ID ||
+    '';
+
   return (
     <html
       lang="en"
+      data-google-client-id={googleClientId}
       className={cn("font-sans", bodyFont.variable, displayFont.variable)}
       suppressHydrationWarning
     >
