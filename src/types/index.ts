@@ -113,3 +113,4 @@ export interface IEnrollment {
     createdAt: Date;
     updatedAt: Date;
 }
+
