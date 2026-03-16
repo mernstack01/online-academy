@@ -17,6 +17,7 @@ import { BookOpen, GraduationCap, Clock, Award, FolderOpen } from 'lucide-react'
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { useI18n } from '@/context/LanguageContext';
 
 interface DashboardStats {
     enrollments: any[];
@@ -28,6 +29,7 @@ interface DashboardStats {
 export default function StudentDashboard() {
     const { isAuthenticated, loading: authLoading } = useAuth();
     const router = useRouter();
+    const { t } = useI18n();
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -74,16 +76,16 @@ export default function StudentDashboard() {
             {/* Header */}
             <div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                    Student Dashboard
+                    {t('studentDashboard.title')}
                 </h1>
-                <p className="text-muted-foreground mt-2">Welcome back! Here's a summary of your learning progress.</p>
+                <p className="text-muted-foreground mt-2">{t('studentDashboard.subtitle')}</p>
             </div>
 
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Enrolled Courses</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">{t('studentDashboard.stats.enrolledCourses')}</CardTitle>
                         <BookOpen className="h-4 w-4 text-purple-400" />
                     </CardHeader>
                     <CardContent>
@@ -93,7 +95,7 @@ export default function StudentDashboard() {
 
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Grades</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">{t('studentDashboard.stats.totalGrades')}</CardTitle>
                         <GraduationCap className="h-4 w-4 text-green-400" />
                     </CardHeader>
                     <CardContent>
@@ -105,7 +107,7 @@ export default function StudentDashboard() {
 
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Upcoming Deadlines</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">{t('studentDashboard.stats.upcomingDeadlines')}</CardTitle>
                         <Clock className="h-4 w-4 text-orange-400" />
                     </CardHeader>
                     <CardContent>
@@ -115,7 +117,7 @@ export default function StudentDashboard() {
 
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Portfolio Items</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">{t('studentDashboard.stats.portfolioItems')}</CardTitle>
                         <Award className="h-4 w-4 text-blue-400" />
                     </CardHeader>
                     <CardContent>
@@ -127,10 +129,10 @@ export default function StudentDashboard() {
             {/* Main Content Tabs */}
             <Tabs defaultValue="courses" className="space-y-4">
                 <TabsList className="bg-white/5 border-white/10">
-                    <TabsTrigger value="courses">My Courses</TabsTrigger>
-                    <TabsTrigger value="assignments">Deadlines</TabsTrigger>
-                    <TabsTrigger value="grades">Recent Grades</TabsTrigger>
-                    <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+                    <TabsTrigger value="courses">{t('studentDashboard.tabs.courses')}</TabsTrigger>
+                    <TabsTrigger value="assignments">{t('studentDashboard.tabs.assignments')}</TabsTrigger>
+                    <TabsTrigger value="grades">{t('studentDashboard.tabs.grades')}</TabsTrigger>
+                    <TabsTrigger value="portfolio">{t('studentDashboard.tabs.portfolio')}</TabsTrigger>
                 </TabsList>
 
                 {/* Courses Tab */}
@@ -157,13 +159,13 @@ export default function StudentDashboard() {
                                 <CardContent>
                                     <div className="space-y-2">
                                         <div className="flex justify-between text-xs text-muted-foreground">
-                                            <span>Progress</span>
+                                            <span>{t('studentDashboard.courses.progress')}</span>
                                             <span>{enrollment.status === 'completed' ? '100%' : '25%'}</span>
                                         </div>
                                         <Progress value={enrollment.status === 'completed' ? 100 : 25} className="h-1 bg-white/5" />
                                     </div>
                                     <Link href={`/student/courses/${enrollment.courseId._id}`} className="mt-4 block text-center py-2 rounded-lg bg-white text-black font-semibold text-sm hover:bg-white/90 transition-all">
-                                        Continue Learning
+                                        {t('studentDashboard.courses.continueLearning')}
                                     </Link>
                                 </CardContent>
                             </Card>
@@ -175,17 +177,17 @@ export default function StudentDashboard() {
                 <TabsContent value="assignments">
                     <Card className="bg-white/5 border-white/10">
                         <CardHeader>
-                            <CardTitle>Upcoming Assignments</CardTitle>
-                            <CardDescription>Don't miss these deadlines.</CardDescription>
+                            <CardTitle>{t('studentDashboard.assignments.title')}</CardTitle>
+                            <CardDescription>{t('studentDashboard.assignments.subtitle')}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Table>
                                 <TableHeader>
                                     <TableRow className="hover:bg-transparent border-white/10">
-                                        <TableHead className="text-muted-foreground">Assignment</TableHead>
-                                        <TableHead className="text-muted-foreground">Course</TableHead>
-                                        <TableHead className="text-muted-foreground">Due Date</TableHead>
-                                        <TableHead className="text-muted-foreground text-right">Action</TableHead>
+                                        <TableHead className="text-muted-foreground">{t('studentDashboard.assignments.table.assignment')}</TableHead>
+                                        <TableHead className="text-muted-foreground">{t('studentDashboard.assignments.table.course')}</TableHead>
+                                        <TableHead className="text-muted-foreground">{t('studentDashboard.assignments.table.dueDate')}</TableHead>
+                                        <TableHead className="text-muted-foreground text-right">{t('studentDashboard.assignments.table.action')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -197,13 +199,17 @@ export default function StudentDashboard() {
                                                 {new Date(assignment.dueDate).toLocaleDateString()}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Link href={`/student/assignments/${assignment._id}`} className="text-xs text-muted-foreground hover:text-foreground transition-all underline">View Details</Link>
+                                                <Link href={`/student/assignments/${assignment._id}`} className="text-xs text-muted-foreground hover:text-foreground transition-all underline">
+                                                    {t('studentDashboard.assignments.viewDetails')}
+                                                </Link>
                                             </TableCell>
                                         </TableRow>
                                     ))}
                                     {stats.upcomingAssignments.length === 0 && (
                                         <TableRow>
-                                            <TableCell colSpan={4} className="text-center py-8 text-muted-foreground italic">No upcoming assignments.</TableCell>
+                                            <TableCell colSpan={4} className="text-center py-8 text-muted-foreground italic">
+                                                {t('studentDashboard.assignments.empty')}
+                                            </TableCell>
                                         </TableRow>
                                     )}
                                 </TableBody>
@@ -216,8 +222,8 @@ export default function StudentDashboard() {
                 <TabsContent value="grades">
                     <Card className="bg-white/5 border-white/10">
                         <CardHeader>
-                            <CardTitle>Recent Grades</CardTitle>
-                            <CardDescription>Track your performance across courses.</CardDescription>
+                            <CardTitle>{t('studentDashboard.grades.title')}</CardTitle>
+                            <CardDescription>{t('studentDashboard.grades.subtitle')}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
@@ -225,23 +231,25 @@ export default function StudentDashboard() {
                                     <div key={submission._id} className="flex items-center justify-between p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all">
                                         <div className="space-y-1">
                                             <div className="font-semibold">{submission.assignmentId?.title}</div>
-                                            <div className="text-xs text-muted-foreground italic">Submitted on {new Date(submission.updatedAt).toLocaleDateString()}</div>
+                                            <div className="text-xs text-muted-foreground italic">
+                                                {t('studentDashboard.grades.submittedOn', { date: new Date(submission.updatedAt).toLocaleDateString() })}
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-4">
                                             {submission.status === 'graded' ? (
                                                 <Badge className="bg-green-500/20 text-green-400 border-none px-3">
-                                                    Grade: {submission.grade}%
+                                                    {t('studentDashboard.grades.gradeLabel', { grade: submission.grade })}
                                                 </Badge>
                                             ) : (
                                                 <Badge variant="outline" className="text-muted-foreground border-white/10">
-                                                    Pending Review
+                                                    {t('studentDashboard.grades.pending')}
                                                 </Badge>
                                             )}
                                         </div>
                                     </div>
                                 ))}
                                 {stats.recentSubmissions.length === 0 && (
-                                    <div className="text-center py-8 text-muted-foreground italic">No submissions yet.</div>
+                                    <div className="text-center py-8 text-muted-foreground italic">{t('studentDashboard.grades.empty')}</div>
                                 )}
                             </div>
                         </CardContent>
@@ -262,11 +270,11 @@ export default function StudentDashboard() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-xs text-muted-foreground mb-4 bg-white/5 p-2 rounded italic">
-                                        Original Assignment: {item.submissionId?.assignmentId?.title}
+                                        {t('studentDashboard.portfolio.originalAssignment')}: {item.submissionId?.assignmentId?.title}
                                     </div>
                                     <a href={item.submissionId?.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-2 w-full rounded-lg border border-white/10 text-foreground hover:bg-white/10 transition-all text-sm font-medium">
                                         <FolderOpen className="h-4 w-4" />
-                                        View Work
+                                        {t('studentDashboard.portfolio.viewWork')}
                                     </a>
                                 </CardContent>
                             </Card>
@@ -276,8 +284,8 @@ export default function StudentDashboard() {
                                 <CardContent className="py-12 flex flex-col items-center justify-center space-y-4">
                                     <Award className="h-12 w-12 text-muted-foreground/40" />
                                     <div className="text-center">
-                                        <div className="font-semibold">No portfolio items yet</div>
-                                        <div className="text-sm text-muted-foreground mt-1">Mark your best submissions as portfolio items to showcase them here.</div>
+                                        <div className="font-semibold">{t('studentDashboard.portfolio.emptyTitle')}</div>
+                                        <div className="text-sm text-muted-foreground mt-1">{t('studentDashboard.portfolio.emptySubtitle')}</div>
                                     </div>
                                 </CardContent>
                             </Card>

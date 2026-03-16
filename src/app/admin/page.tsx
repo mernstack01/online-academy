@@ -18,7 +18,7 @@ import Link from 'next/link';
 import { ICourse, UserRole } from '@/types';
 
 interface AdminStats {
-    totalUsers: number;
+    totalTeachers: number;
     totalCourses: number;
     totalStudents: number;
     totalSubmissions: number;
@@ -308,11 +308,11 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Users</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Teachers</CardTitle>
                         <Users className="h-4 w-4 text-primary" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-black">{stats.totalUsers}</div>
+                        <div className="text-3xl font-black">{stats.totalTeachers}</div>
                     </CardContent>
                 </Card>
 
@@ -355,6 +355,9 @@ export default function AdminDashboard() {
                 <CardContent className="flex flex-col md:flex-row gap-4">
                     <Link href="/teacher/courses/new" className="flex-1 px-4 py-3 rounded-xl bg-white text-black font-semibold text-center hover:bg-white/90 transition-all">
                         Create New Course
+                    </Link>
+                    <Link href="/admin/users" className="flex-1 px-4 py-3 rounded-xl bg-white/10 text-foreground font-semibold text-center hover:bg-white/20 transition-all border border-white/10">
+                        Manage Users
                     </Link>
                     <Link href="/teacher/dashboard" className="flex-1 px-4 py-3 rounded-xl bg-white/10 text-foreground font-semibold text-center hover:bg-white/20 transition-all border border-white/10">
                         Review Teacher Stats

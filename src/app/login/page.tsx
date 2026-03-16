@@ -4,8 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import GoogleAuthButton from '@/components/GoogleAuthButton';
+import { useI18n } from '@/context/LanguageContext';
 
 export default function LoginPage() {
+    const { t } = useI18n();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -68,9 +70,9 @@ export default function LoginPage() {
         <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full glass p-8 rounded-2xl animate-fade-in">
                 <div className="text-center mb-10">
-                    <h2 className="text-3xl font-extrabold text-foreground">Welcome Back</h2>
+                    <h2 className="text-3xl font-extrabold text-foreground">{t('auth.login.title')}</h2>
                     <p className="mt-2 text-sm text-muted-foreground">
-                        Please enter your credentials to access your account
+                        {t('auth.login.subtitle')}
                     </p>
                 </div>
 
@@ -82,22 +84,22 @@ export default function LoginPage() {
                     )}
 
                     <div className="space-y-1">
-                        <label className="text-sm font-medium text-muted-foreground ml-1">Email address</label>
+                        <label className="text-sm font-medium text-muted-foreground ml-1">{t('auth.labels.email')}</label>
                         <input
                             type="email"
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                            placeholder="you@example.com"
+                            placeholder={t('auth.placeholders.email')}
                         />
                     </div>
 
                     <div className="space-y-1">
                         <div className="flex items-center justify-between ml-1">
-                            <label className="text-sm font-medium text-muted-foreground">Password</label>
+                            <label className="text-sm font-medium text-muted-foreground">{t('auth.labels.password')}</label>
                             <Link href="#" className="text-xs text-primary hover:text-primary-hover transition-colors">
-                                Forgot password?
+                                {t('auth.login.forgotPassword')}
                             </Link>
                         </div>
                         <input
@@ -106,7 +108,7 @@ export default function LoginPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                            placeholder="••••••••"
+                            placeholder={t('auth.placeholders.password')}
                         />
                     </div>
 
@@ -115,28 +117,28 @@ export default function LoginPage() {
                         disabled={loading}
                         className="w-full py-3 px-4 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary/20"
                     >
-                        {loading ? 'Logging in...' : 'Log In'}
+                        {loading ? t('auth.login.submitting') : t('auth.login.submit')}
                     </button>
                 </form>
 
                 <div className="my-6 flex items-center gap-3">
                     <span className="h-px flex-1 bg-white/10" />
-                    <span className="text-xs uppercase tracking-widest text-muted-foreground">or</span>
+                    <span className="text-xs uppercase tracking-widest text-muted-foreground">{t('auth.or')}</span>
                     <span className="h-px flex-1 bg-white/10" />
                 </div>
 
-                <GoogleAuthButton onCredential={handleGoogleCredential} />
+                <GoogleAuthButton onCredential={handleGoogleCredential} label={t('auth.googleButton')} />
                 {oauthLoading && (
                     <p className="mt-3 text-xs text-muted-foreground text-center">
-                        Signing in with Google...
+                        {t('auth.login.googleLoading')}
                     </p>
                 )}
 
                 <div className="mt-8 text-center">
                     <p className="text-sm text-muted-foreground">
-                        Don't have an account?{' '}
+                        {t('auth.login.noAccount')}{' '}
                         <Link href="/register" className="font-medium text-primary hover:text-primary-hover transition-colors">
-                            Sign up for free
+                            {t('auth.login.signupLink')}
                         </Link>
                     </p>
                 </div>

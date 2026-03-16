@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { useI18n } from '@/context/LanguageContext';
 
 export default function Home() {
+  const { t } = useI18n();
   const { user } = useAuth();
 
   return (
@@ -11,14 +13,15 @@ export default function Home() {
       <div className="max-w-3xl space-y-8">
         <div className="space-y-4">
           <h2 className="text-primary font-bold tracking-widest uppercase text-sm">
-            Future of Education
+            {t('home.badge')}
           </h2>
           <h1 className="text-5xl md:text-7xl font-black text-foreground leading-tight tracking-tighter">
-            Unlock Your <span className="text-primary">Creative</span> Potential
+            {t('home.titlePrefix')}{' '}
+            <span className="text-primary">{t('home.titleEmphasis')}</span>{' '}
+            {t('home.titleSuffix')}
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Experience a new way of learning with our high-impact courses,
-            expert mentors, and a community dedicated to growth.
+            {t('home.description')}
           </p>
         </div>
 
@@ -27,14 +30,14 @@ export default function Home() {
             href="/courses"
             className="w-full sm:w-auto px-10 py-4 bg-primary hover:bg-primary-hover text-white font-bold rounded-2xl transition-all shadow-xl shadow-primary/30 hover:scale-105 active:scale-95"
           >
-            Explore Courses
+            {t('home.exploreCourses')}
           </Link>
           {!user && (
             <Link
               href="/register"
               className="w-full sm:w-auto px-10 py-4 glass text-foreground font-bold rounded-2xl hover:bg-white/10 transition-all hover:scale-105 active:scale-95"
             >
-              Get Started
+              {t('home.getStarted')}
             </Link>
           )}
         </div>
@@ -44,27 +47,27 @@ export default function Home() {
             <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary text-2xl font-bold">
               ★
             </div>
-            <h3 className="text-xl font-bold text-foreground">Expert Tutoring</h3>
+            <h3 className="text-xl font-bold text-foreground">{t('home.features.expertTitle')}</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Learn from the best in the industry with personalized feedback loops.
+              {t('home.features.expertDesc')}
             </p>
           </div>
           <div className="p-8 glass rounded-3xl space-y-4 text-left">
             <div className="w-12 h-12 bg-secondary/20 rounded-2xl flex items-center justify-center text-secondary text-2xl font-bold">
               ⎙
             </div>
-            <h3 className="text-xl font-bold text-foreground">Flexible Learning</h3>
+            <h3 className="text-xl font-bold text-foreground">{t('home.features.flexibleTitle')}</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Learn at your own pace with lifetime access to all course materials.
+              {t('home.features.flexibleDesc')}
             </p>
           </div>
           <div className="p-8 glass rounded-3xl space-y-4 text-left">
             <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary text-2xl font-bold">
               ∞
             </div>
-            <h3 className="text-xl font-bold text-foreground">Career Support</h3>
+            <h3 className="text-xl font-bold text-foreground">{t('home.features.careerTitle')}</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Get the tools you need to succeed in your professional journey.
+              {t('home.features.careerDesc')}
             </p>
           </div>
         </div>

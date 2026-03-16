@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useI18n } from '@/context/LanguageContext';
 
 interface LessonVideoProps {
     title: string;
@@ -14,6 +15,7 @@ interface LessonVideoProps {
  * Renders an embedded Vimeo or YouTube player with lesson metadata.
  */
 const LessonVideo: React.FC<LessonVideoProps> = ({ title, description, videoUrl }) => {
+    const { t } = useI18n();
     // Extract Video ID from common Vimeo URL formats
     const getVimeoId = (url: string) => {
         const regExp = /vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:$|\/|\?)/;
@@ -35,7 +37,7 @@ const LessonVideo: React.FC<LessonVideoProps> = ({ title, description, videoUrl 
         return (
             <Card className="w-full bg-destructive/10 border-destructive/20">
                 <CardContent className="pt-6 text-center text-destructive">
-                    Invalid video URL. Only Vimeo or YouTube links are supported.
+                    {t('lessonVideo.invalidUrl')}
                 </CardContent>
             </Card>
         );

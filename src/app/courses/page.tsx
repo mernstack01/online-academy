@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ICourse } from '@/types';
 import { ADMIN_TELEGRAM_URL } from '@/lib/constants';
+import { useI18n } from '@/context/LanguageContext';
 
 export default function CoursesPage() {
+    const { t } = useI18n();
     const [courses, setCourses] = useState<ICourse[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -43,8 +45,8 @@ export default function CoursesPage() {
     return (
         <div className="py-12 animate-fade-in">
             <div className="mb-12">
-                <h1 className="text-4xl font-extrabold text-foreground mb-2">Explore Courses</h1>
-                <p className="text-muted-foreground">Expand your skills with our premium academy content</p>
+                <h1 className="text-4xl font-extrabold text-foreground mb-2">{t('courses.title')}</h1>
+                <p className="text-muted-foreground">{t('courses.subtitle')}</p>
             </div>
 
             {error ? (
@@ -53,7 +55,7 @@ export default function CoursesPage() {
                 </div>
             ) : courses.length === 0 ? (
                 <div className="text-center py-20 glass rounded-2xl">
-                    <p className="text-muted-foreground text-lg italic">No courses available yet. Check back later!</p>
+                    <p className="text-muted-foreground text-lg italic">{t('courses.empty')}</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -77,7 +79,7 @@ export default function CoursesPage() {
                                         </div>
                                     )}
                                     <div className="absolute top-4 right-4 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                                        {(course.price ?? 0) > 0 ? `$${course.price}` : 'FREE'}
+                                        {(course.price ?? 0) > 0 ? `$${course.price}` : t('courses.freeBadge')}
                                     </div>
                                 </div>
                             </Link>
@@ -98,14 +100,14 @@ export default function CoursesPage() {
                                             {(course.instructor as any).name?.charAt(0) || 'I'}
                                         </div>
                                         <span className="text-xs text-muted-foreground font-medium">
-                                            {(course.instructor as any).name || 'Instructor'}
+                                            {(course.instructor as any).name || t('courses.instructorFallback')}
                                         </span>
                                     </div>
                                     <Link
                                         href={`/courses/${course._id}`}
                                         className="text-xs text-primary font-semibold tracking-wider uppercase"
                                     >
-                                        View Details
+                                        {t('courses.viewDetails')}
                                     </Link>
                                 </div>
 
@@ -116,11 +118,11 @@ export default function CoursesPage() {
                                         rel="noreferrer"
                                         className="mt-4 inline-flex items-center justify-center rounded-xl bg-white text-black text-xs font-bold px-4 py-3 uppercase tracking-wider hover:bg-white/90 transition-all"
                                     >
-                                        Contact Admin to Buy
+                                        {t('courses.contactAdmin')}
                                     </a>
                                 ) : (
                                     <div className="mt-4 text-xs text-muted-foreground font-semibold uppercase tracking-wider">
-                                        Free Course — Enroll Inside
+                                        {t('courses.freeEnroll')}
                                     </div>
                                 )}
                             </div>

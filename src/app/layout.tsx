@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Sora } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { LanguageProvider } from "@/context/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
 
 const displayFont = Space_Grotesk({ subsets: ['latin'], variable: '--font-display' });
 const bodyFont = Sora({ subsets: ['latin'], variable: '--font-sans' });
@@ -26,20 +28,23 @@ export default function RootLayout({
 
   return (
     <html
-      lang="en"
+      lang="uz"
       data-google-client-id={googleClientId}
       className={cn("font-sans", bodyFont.variable, displayFont.variable)}
       suppressHydrationWarning
     >
       <body className={`${bodyFont.className} antialiased`} suppressHydrationWarning>
-        <AuthProvider>
-          <div className="bg-gradient-mesh" />
-          <Navbar />
-          <main className="min-h-screen pt-20 px-4 md:px-8 max-w-7xl mx-auto">
-            {children}
-          </main>
-          <Footer />
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <div className="bg-gradient-mesh" />
+            <Navbar />
+            <main className="min-h-screen pt-20 px-4 md:px-8 max-w-7xl mx-auto">
+              {children}
+            </main>
+            <Footer />
+            <Toaster richColors />
+          </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

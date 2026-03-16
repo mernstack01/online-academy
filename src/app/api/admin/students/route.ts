@@ -38,3 +38,51 @@ export const GET = withAuth(async (req) => {
         return NextResponse.json({ message: error.message }, { status: 500 });
     }
 }, [UserRole.ADMIN]);
+
+/**
+ * @route POST /api/admin/students
+ * @desc Create student
+ * @access Private (Admin)
+ */
+export const POST = withAuth(async (req) => {
+    try {
+        const body = await req.json();
+        const name = String(body.name || '').trim();
+        const email = String(body.email || '').toLowerCase().trim();
+        const password = String(body.password || '');
+        const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+
+        if (!name || !email || !password) {
+            return NextResponse.json({ message: 'Name, email and password are required' }, { status: 400 });
+        }
+
+        if (adminEmail && email === adminEmail) {
+            return NextResponse.json({ message: 'Email is reserved' }, { status: 400 });
+        }
+
+        await dbConnect();
+        const exists = await User.findOne({ email });
+        if (exists) {
+            return NextResponse.json({ message: 'User already exists' }, { status: 400 });
+        }
+
+        const student = await User.create({
+            name,
+            email,
+            password,
+            role: UserRole.STUDENT,
+        });
+
+        return NextResponse.json(
+            {
+                _id: student._id,
+                name: student.name,
+                email: student.email,
+                role: student.role,
+            },
+            { status: 201 }
+        );
+    } catch (error: any) {
+        return NextResponse.json({ message: error.message }, { status: 500 });
+    }
+}, [UserRole.ADMIN]);

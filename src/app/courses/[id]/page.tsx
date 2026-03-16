@@ -10,11 +10,13 @@ import { BookOpen, CheckCircle, Clock, GraduationCap, PlayCircle, Users, ArrowLe
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { ADMIN_TELEGRAM_URL } from '@/lib/constants';
+import { useI18n } from '@/context/LanguageContext';
 
 export default function CourseDetailPage() {
     const params = useParams();
     const router = useRouter();
     const { user, isAuthenticated, loading: authLoading } = useAuth();
+    const { t } = useI18n();
     const [course, setCourse] = useState<ICourse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -32,7 +34,7 @@ export default function CourseDetailPage() {
                 if (courseRes.ok) {
                     setCourse(courseData);
                 } else {
-                    setError(courseData.message || 'Course not found');
+                    setError(courseData.message || t('courseDetail.errors.notFound'));
                     setLoading(false);
                     return;
                 }
@@ -47,7 +49,7 @@ export default function CourseDetailPage() {
                 }
             } catch (error: any) {
                 console.error('Failed to fetch course data:', error);
-                setError(error.message || 'Failed to load course');
+                setError(error.message || t('courseDetail.errors.loadFailed'));
             } finally {
                 setLoading(false);
             }
@@ -60,7 +62,7 @@ export default function CourseDetailPage() {
 
     const handleEnroll = async () => {
         if ((course?.price ?? 0) > 0) {
-            alert('Paid course. Please contact admin to enroll.');
+            alert(t('courseDetail.alerts.paidContactAdmin'));
             return;
         }
         if (!isAuthenticated) {
@@ -69,7 +71,7 @@ export default function CourseDetailPage() {
         }
 
         if (user?.role !== UserRole.STUDENT) {
-            alert('Only students can enroll in courses.');
+            alert(t('courseDetail.alerts.onlyStudents'));
             return;
         }
 
@@ -81,14 +83,14 @@ export default function CourseDetailPage() {
 
             if (res.ok) {
                 setIsEnrolled(true);
-                alert('Successfully enrolled!');
+                alert(t('courseDetail.alerts.enrolled'));
             } else {
                 const data = await res.json();
-                alert(data.message || 'Enrollment failed');
+                alert(data.message || t('courseDetail.alerts.enrollFailed'));
             }
         } catch (error) {
             console.error('Enrollment error:', error);
-            alert('An error occurred during enrollment');
+            alert(t('courseDetail.alerts.enrollError'));
         } finally {
             setEnrolling(false);
         }
@@ -106,10 +108,10 @@ export default function CourseDetailPage() {
         return (
             <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
                 <div className="glass p-10 rounded-3xl border border-white/10 text-center max-w-lg">
-                    <h2 className="text-2xl font-black italic mb-3">Unable to load course</h2>
+                    <h2 className="text-2xl font-black italic mb-3">{t('courseDetail.errors.unableToLoad')}</h2>
                     <p className="text-muted-foreground mb-6">{error}</p>
                     <Link href="/courses" className="px-5 py-3 rounded-xl bg-white text-black font-semibold hover:bg-white/90 transition-all">
-                        Back to Courses
+                        {t('courseDetail.actions.backToCourses')}
                     </Link>
                 </div>
             </div>
@@ -131,7 +133,7 @@ export default function CourseDetailPage() {
                     />
                 ) : (
                     <div className="w-full h-full bg-gradient-to-br from-purple-900/20 to-black flex items-center justify-center">
-                        <span className="text-muted-foreground/30 font-black text-9xl">ACADEMY</span>
+                        <span className="text-muted-foreground/30 font-black text-9xl">{t('courseDetail.hero.academyFallback')}</span>
                     </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
@@ -139,7 +141,7 @@ export default function CourseDetailPage() {
                 <div className="absolute bottom-0 left-0 right-0 p-8 md:p-16 max-w-7xl mx-auto w-full">
                     <Link href="/courses" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-all group w-fit">
                         <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-                        Back to Courses
+                        {t('courseDetail.actions.backToCourses')}
                     </Link>
                     <h1 className="text-4xl md:text-6xl font-black mb-4 tracking-tighter italic">
                         {course.title}
@@ -151,7 +153,7 @@ export default function CourseDetailPage() {
                         </div>
                         <div className="flex items-center gap-2">
                             <BookOpen className="h-4 w-4 text-muted-foreground" />
-                            <span>{course.modules.length} Modules</span>
+                            <span>{t('courseDetail.meta.modulesCount', { count: course.modules.length })}</span>
                         </div>
                         <Badge className="bg-primary text-white hover:bg-primary border-none text-lg px-4 py-1">
                             ${course.price}
@@ -165,17 +167,17 @@ export default function CourseDetailPage() {
                 {/* Main Info */}
                 <div className="lg:col-span-2 space-y-12">
                     <section>
-                        <h2 className="text-2xl font-bold mb-4 border-l-4 border-primary pl-4">Description</h2>
+                        <h2 className="text-2xl font-bold mb-4 border-l-4 border-primary pl-4">{t('courseDetail.labels.description')}</h2>
                         <p className="text-muted-foreground leading-relaxed text-lg italic">
                             {course.description}
                         </p>
                     </section>
 
                     <section>
-                        <h2 className="text-2xl font-bold mb-6 border-l-4 border-primary pl-4 uppercase tracking-widest">Syllabus</h2>
+                        <h2 className="text-2xl font-bold mb-6 border-l-4 border-primary pl-4 uppercase tracking-widest">{t('courseDetail.labels.syllabus')}</h2>
                         <div className="space-y-4">
                             {course.modules.length === 0 ? (
-                                <p className="text-muted-foreground italic">Curriculum is being updated...</p>
+                                <p className="text-muted-foreground italic">{t('courseDetail.labels.curriculumUpdating')}</p>
                             ) : (
                                 course.modules.sort((a, b) => a.order - b.order).map((module, idx) => (
                                     <Card key={module._id} className="bg-white/5 border-white/10 overflow-hidden glass-hover">
@@ -186,7 +188,7 @@ export default function CourseDetailPage() {
                                                     {module.title}
                                                 </CardTitle>
                                                 <Badge variant="outline" className="border-white/10 text-muted-foreground">
-                                                    {module.lessons.length} Lessons
+                                                    {t('courseDetail.meta.lessonsCount', { count: module.lessons.length })}
                                                 </Badge>
                                             </div>
                                         </CardHeader>
@@ -212,7 +214,7 @@ export default function CourseDetailPage() {
                             <div className="space-y-2">
                                 <h3 className="text-3xl font-black italic tracking-tight">${course.price}</h3>
                                 <p className="text-sm text-muted-foreground">
-                                    {isPaid ? 'One-time payment for lifetime access' : 'Free access to all materials'}
+                                    {isPaid ? t('courseDetail.labels.pricePaidNote') : t('courseDetail.labels.priceFreeNote')}
                                 </p>
                             </div>
 
@@ -222,7 +224,7 @@ export default function CourseDetailPage() {
                                         <Button className="w-full h-14 bg-green-500 hover:bg-green-600 text-black font-black text-lg skew-x-[-12deg] transition-all">
                                             <span className="skew-x-[12deg] flex items-center gap-2">
                                                 <GraduationCap className="h-6 w-6" />
-                                                CONTINUE LEARNING
+                                                {t('courseDetail.actions.continueLearning')}
                                             </span>
                                         </Button>
                                     </Link>
@@ -235,7 +237,7 @@ export default function CourseDetailPage() {
                                     >
                                         <Button className="w-full h-14 bg-white hover:bg-white/90 text-black font-black text-lg skew-x-[-12deg] transition-all">
                                             <span className="skew-x-[12deg] flex items-center gap-2 uppercase">
-                                                CONTACT ADMIN TO BUY
+                                                {t('courseDetail.actions.contactAdminToBuy')}
                                             </span>
                                         </Button>
                                     </a>
@@ -246,13 +248,16 @@ export default function CourseDetailPage() {
                                         className="w-full h-14 bg-white hover:bg-white/90 text-black font-black text-lg skew-x-[-12deg] transition-all disabled:opacity-50"
                                     >
                                         <span className="skew-x-[12deg] flex items-center gap-2 uppercase">
-                                            {enrolling ? 'Processing...' : (isAuthenticated ? 'Enroll Now' : 'Login to Enroll')}
+                                            {enrolling
+                                                ? t('courseDetail.actions.processing')
+                                                : (isAuthenticated ? t('courseDetail.actions.enrollNow') : t('courseDetail.actions.loginToEnroll'))
+                                            }
                                         </span>
                                     </Button>
                                 )}
                                 {isPaid && !isEnrolled ? (
                                     <p className="text-xs text-muted-foreground text-center">
-                                        Paid course. Access is granted by admin after payment.
+                                        {t('courseDetail.labels.paidAccessNote')}
                                     </p>
                                 ) : null}
                             </div>
@@ -260,15 +265,15 @@ export default function CourseDetailPage() {
                             <div className="space-y-4 pt-6 border-t border-white/10">
                                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                                     <CheckCircle className="h-4 w-4 text-primary" />
-                                    <span>Lifetime access to all materials</span>
+                                    <span>{t('courseDetail.labels.featureLifetime')}</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                                     <CheckCircle className="h-4 w-4 text-primary" />
-                                    <span>Downloadable resources</span>
+                                    <span>{t('courseDetail.labels.featureDownloadable')}</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                                     <CheckCircle className="h-4 w-4 text-primary" />
-                                    <span>Certificate of completion</span>
+                                    <span>{t('courseDetail.labels.featureCertificate')}</span>
                                 </div>
                             </div>
                         </div>

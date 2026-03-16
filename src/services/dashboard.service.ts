@@ -11,15 +11,15 @@ import { UserRole } from '@/types';
 export const getAdminStats = async () => {
     await dbConnect();
 
-    const [totalUsers, totalCourses, totalStudents, totalSubmissions] = await Promise.all([
-        User.countDocuments(),
+    const [totalTeachers, totalCourses, totalStudents, totalSubmissions] = await Promise.all([
+        User.countDocuments({ role: UserRole.TEACHER }),
         Course.countDocuments(),
         User.countDocuments({ role: UserRole.STUDENT }),
         Submission.countDocuments(),
     ]);
 
     return {
-        totalUsers,
+        totalTeachers,
         totalCourses,
         totalStudents,
         totalSubmissions,

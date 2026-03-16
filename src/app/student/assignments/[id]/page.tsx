@@ -18,11 +18,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { useI18n } from '@/context/LanguageContext';
 
 export default function AssignmentSubmissionPage() {
     const params = useParams();
     const router = useRouter();
     const { isAuthenticated, loading: authLoading } = useAuth();
+    const { t } = useI18n();
 
     const [assignment, setAssignment] = useState<IAssignment | null>(null);
     const [submission, setSubmission] = useState<ISubmission | null>(null);
@@ -75,7 +77,7 @@ export default function AssignmentSubmissionPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!fileUrl) {
-            alert('Please provide a file URL or link to your work.');
+            alert(t('studentAssignment.alerts.missingFile'));
             return;
         }
 
@@ -94,14 +96,14 @@ export default function AssignmentSubmissionPage() {
             if (res.ok) {
                 const data = await res.json();
                 setSubmission(data);
-                alert('Assignment submitted successfully!');
+                alert(t('studentAssignment.alerts.submitted'));
             } else {
                 const data = await res.json();
-                alert(data.message || 'Submission failed');
+                alert(data.message || t('studentAssignment.alerts.failed'));
             }
         } catch (error) {
             console.error('Submission error:', error);
-            alert('An error occurred during submission');
+            alert(t('studentAssignment.alerts.error'));
         } finally {
             setSubmitting(false);
         }
@@ -127,7 +129,7 @@ export default function AssignmentSubmissionPage() {
                     <div className="space-y-2">
                         <Link href="/student/dashboard" className="text-muted-foreground hover:text-foreground flex items-center gap-2 mb-4 group w-fit transition-all">
                             <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-                            Back to Dashboard
+                            {t('studentAssignment.backToDashboard')}
                         </Link>
                         <h1 className="text-4xl font-black italic tracking-tighter uppercase">
                             {assignment.title}
@@ -135,10 +137,10 @@ export default function AssignmentSubmissionPage() {
                         <div className="flex items-center gap-4 text-sm">
                         <div className={`flex items-center gap-2 ${isPastDue ? 'text-red-400' : 'text-orange-400'}`}>
                             <Calendar className="h-4 w-4" />
-                            <span>Due: {new Date(assignment.dueDate).toLocaleDateString()}</span>
+                            <span>{t('studentAssignment.due', { date: new Date(assignment.dueDate).toLocaleDateString() })}</span>
                         </div>
                         <Badge variant="outline" className="border-white/10 text-muted-foreground">
-                            100 Points Max
+                            {t('studentAssignment.pointsMax')}
                         </Badge>
                     </div>
                     </div>
@@ -149,7 +151,7 @@ export default function AssignmentSubmissionPage() {
                                 <>
                                     <CheckCircle className="h-8 w-8 text-green-500" />
                                     <div>
-                                        <div className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Final Grade</div>
+                                        <div className="text-xs text-muted-foreground uppercase font-bold tracking-widest">{t('studentAssignment.finalGrade')}</div>
                                         <div className="text-2xl font-black tracking-tighter text-green-400">{submission.grade}%</div>
                                     </div>
                                 </>
@@ -157,8 +159,8 @@ export default function AssignmentSubmissionPage() {
                                 <>
                                     <Clock className="h-8 w-8 text-orange-400 animate-pulse" />
                                     <div>
-                                        <div className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Status</div>
-                                        <div className="text-sm font-bold italic">Pending Review</div>
+                                        <div className="text-xs text-muted-foreground uppercase font-bold tracking-widest">{t('studentAssignment.status')}</div>
+                                        <div className="text-sm font-bold italic">{t('studentAssignment.pendingReview')}</div>
                                     </div>
                                 </>
                             )}
@@ -170,9 +172,9 @@ export default function AssignmentSubmissionPage() {
                     {/* Instructions */}
                     <div className="lg:col-span-2 space-y-8">
                         <section className="glass p-8 rounded-2xl border border-white/10 space-y-4">
-                            <h2 className="text-xl font-bold italic tracking-tight flex items-center gap-2 border-b border-white/10 pb-4">
+                            <h2 className="text-xl font-bold italic tracking-tight flex items-center gap-2 border-b border-white/10 pb-4 uppercase">
                                 <FileText className="h-5 w-5 text-primary" />
-                                INSTRUCTIONS
+                                {t('studentAssignment.instructions')}
                             </h2>
                             <div className="text-muted-foreground leading-relaxed whitespace-pre-wrap italic">
                                 {assignment.description}
@@ -181,9 +183,9 @@ export default function AssignmentSubmissionPage() {
 
                         {submission?.teacherComment && (
                             <section className="bg-primary/10 p-8 rounded-2xl border border-primary/20 space-y-4">
-                                <h2 className="text-xl font-bold italic tracking-tight flex items-center gap-2 text-primary">
+                                <h2 className="text-xl font-bold italic tracking-tight flex items-center gap-2 text-primary uppercase">
                                     <AlertCircle className="h-5 w-5" />
-                                    TEACHER FEEDBACK
+                                    {t('studentAssignment.teacherFeedback')}
                                 </h2>
                                 <p className="text-primary/80 leading-relaxed italic">
                                     "{submission.teacherComment}"
@@ -196,22 +198,22 @@ export default function AssignmentSubmissionPage() {
                     <div className="lg:col-span-1">
                         <Card className="bg-white/5 border-white/10 overflow-hidden sticky top-24">
                             <CardHeader className="bg-white/[0.02] border-b border-white/10">
-                                <CardTitle className="text-lg italic uppercase">Your Submission</CardTitle>
+                                <CardTitle className="text-lg italic uppercase">{t('studentAssignment.yourSubmission')}</CardTitle>
                                 <CardDescription>
-                                    {submission ? 'Update your previous work' : 'Submit your final work here'}
+                                    {submission ? t('studentAssignment.updatePrevious') : t('studentAssignment.submitFinal')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="pt-6">
                                 <form onSubmit={handleSubmit} className="space-y-6">
                                     <div className="space-y-2">
-                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Project URL / File Link</label>
+                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('studentAssignment.projectUrlLabel')}</label>
                                 <div className="relative">
                                     <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <input
                                         type="url"
                                         value={fileUrl}
                                         onChange={(e) => setFileUrl(e.target.value)}
-                                        placeholder="https://github.com/..."
+                                        placeholder={t('studentAssignment.projectUrlPlaceholder')}
                                         className="w-full bg-card border border-white/10 rounded-lg py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-primary/50 transition-all italic text-foreground placeholder-muted-foreground"
                                         required
                                         disabled={submission?.status === 'graded'}
@@ -220,11 +222,11 @@ export default function AssignmentSubmissionPage() {
                                     </div>
 
                                     <div className="space-y-2">
-                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Comments (Optional)</label>
+                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('studentAssignment.commentsLabel')}</label>
                                 <textarea
                                     value={comment}
                                     onChange={(e) => setComment(e.target.value)}
-                                    placeholder="Write something to your teacher..."
+                                    placeholder={t('studentAssignment.commentsPlaceholder')}
                                     className="w-full bg-card border border-white/10 rounded-lg p-4 text-sm focus:outline-none focus:border-primary/50 transition-all h-32 resize-none italic text-foreground placeholder-muted-foreground"
                                     disabled={submission?.status === 'graded'}
                                 />
@@ -238,14 +240,17 @@ export default function AssignmentSubmissionPage() {
                                         >
                                             <span className="skew-x-[12deg] flex items-center justify-center gap-2">
                                                 <Send className="h-5 w-5" />
-                                                {submitting ? 'SUBMITTING...' : (submission ? 'UPDATE SUBMISSION' : 'SUBMIT PROJECT')}
+                                                {submitting
+                                                    ? t('studentAssignment.submitting')
+                                                    : (submission ? t('studentAssignment.updateSubmission') : t('studentAssignment.submitProject'))
+                                                }
                                             </span>
                                         </Button>
                                     )}
 
                                     {isPastDue && !submission && (
                                         <p className="text-xs text-red-400 text-center italic">
-                                            Assignment is past due and cannot be submitted.
+                                            {t('studentAssignment.pastDue')}
                                         </p>
                                     )}
                                 </form>

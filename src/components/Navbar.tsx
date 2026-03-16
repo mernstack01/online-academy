@@ -4,8 +4,11 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/types';
 import ThemeToggle from '@/components/ThemeToggle';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useI18n } from '@/context/LanguageContext';
 
 export default function Navbar() {
+    const { t } = useI18n();
     const { user, logout } = useAuth();
     const dashboardHref =
         user?.role === UserRole.ADMIN
@@ -34,28 +37,30 @@ export default function Navbar() {
                     <div className="hidden md:block">
                         <div className="ml-10 flex items-baseline space-x-4">
                             <Link href="/courses" className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                                Courses
+                                {t('nav.courses')}
                             </Link>
                             {dashboardHref && (
                                 <Link href={dashboardHref} className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                                    Dashboard
+                                    {t('nav.dashboard')}
                                 </Link>
                             )}
                         </div>
                     </div>
 
                     <div className="flex items-center gap-4">
+                        <LanguageSwitcher />
                         <ThemeToggle />
                         {user ? (
                             <div className="flex items-center gap-4">
                                 <span className="text-sm text-muted-foreground hidden sm:inline">
-                                    Hi, <span className="text-foreground font-medium">{user.name}</span>
+                                    {t('nav.greeting')}{' '}
+                                    <span className="text-foreground font-medium">{user.name}</span>
                                 </span>
                                 <button
                                     onClick={logout}
                                     className="px-4 py-2 text-sm font-medium text-foreground bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/10"
                                 >
-                                    Log out
+                                    {t('nav.logout')}
                                 </button>
                             </div>
                         ) : (
@@ -64,13 +69,13 @@ export default function Navbar() {
                                     href="/login"
                                     className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                                 >
-                                    Login
+                                    {t('nav.login')}
                                 </Link>
                                 <Link
                                     href="/register"
                                     className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-lg transition-all shadow-lg shadow-primary/20 hover:scale-105 active:scale-95"
                                 >
-                                    Sign Up
+                                    {t('nav.signup')}
                                 </Link>
                             </div>
                         )}

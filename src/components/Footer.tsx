@@ -1,6 +1,11 @@
+'use client';
+
 import Link from 'next/link';
+import { useI18n } from '@/context/LanguageContext';
 
 export default function Footer() {
+  const { t } = useI18n();
+
   return (
     <footer className="mt-16 pb-10">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -16,34 +21,33 @@ export default function Footer() {
                 </span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
-                Zamonaviy kurslar, tajribali mentorlar va kuchli hamjamiyat bilan
-                bilimlaringizni yangi bosqichga olib chiqing.
+                {t('footer.summary')}
               </p>
             </div>
 
             <div className="space-y-3">
               <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                Tezkor havolalar
+                {t('footer.quickLinks')}
               </p>
               <div className="flex flex-col gap-2 text-sm">
                 <Link href="/courses" className="text-foreground/80 hover:text-foreground transition-colors">
-                  Kurslar
+                  {t('footer.courses')}
                 </Link>
                 <Link href="/login" className="text-foreground/80 hover:text-foreground transition-colors">
-                  Kirish
+                  {t('footer.login')}
                 </Link>
                 <Link href="/register" className="text-foreground/80 hover:text-foreground transition-colors">
-                  Ro'yxatdan o'tish
+                  {t('footer.register')}
                 </Link>
               </div>
             </div>
 
             <div className="space-y-4">
               <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                Murojaat
+                {t('footer.contact')}
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Savollaringiz bo'lsa, Telegram orqali yozing. Tezkor javob beramiz.
+                {t('footer.contactDesc')}
               </p>
               <a
                 href="https://t.me/homenecy"
@@ -51,14 +55,16 @@ export default function Footer() {
                 rel="noreferrer"
                 className="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-primary text-white text-sm font-semibold shadow-lg shadow-primary/25 hover:bg-primary-hover transition-colors"
               >
-                Telegramga yozish
+                {t('footer.contactCta')}
               </a>
             </div>
           </div>
 
           <div className="mt-10 pt-6 border-t border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs text-muted-foreground">
-            <span>© {new Date().getFullYear()} OnlineAcademy. Barcha huquqlar himoyalangan.</span>
-            <span className="text-foreground/70">O'quvchi va mentorlar uchun qulay platforma.</span>
+            <span>
+              © {new Date().getFullYear()} OnlineAcademy. {t('footer.rights')}
+            </span>
+            <span className="text-foreground/70">{t('footer.tagline')}</span>
           </div>
         </div>
       </div>

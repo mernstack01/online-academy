@@ -20,11 +20,13 @@ import {
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import { useI18n } from '@/context/LanguageContext';
 
 export default function StudentCourseView() {
     const params = useParams();
     const router = useRouter();
     const { user, isAuthenticated, loading: authLoading } = useAuth();
+    const { t } = useI18n();
 
     const [course, setCourse] = useState<ICourse | null>(null);
     const [loading, setLoading] = useState(true);
@@ -150,8 +152,8 @@ export default function StudentCourseView() {
                 transition-all duration-300 bg-white/[0.02] border-r border-white/10 flex flex-col h-full z-40
             `}>
                 <div className="p-6 border-b border-white/10 flex items-center justify-between overflow-hidden">
-                    <h2 className={`font-black tracking-tighter italic text-xl whitespace-nowrap ${!sidebarOpen && 'lg:hidden'}`}>
-                        CURRICULUM
+                    <h2 className={`font-black tracking-tighter italic text-xl whitespace-nowrap uppercase ${!sidebarOpen && 'lg:hidden'}`}>
+                        {t('studentCourse.curriculum')}
                     </h2>
                     <Link href={`/courses/${course._id}`} className="text-muted-foreground hover:text-foreground transition-colors">
                         <ArrowLeft className="h-5 w-5" />
@@ -240,7 +242,7 @@ export default function StudentCourseView() {
                                 return (
                                     <div key={qKey} className="border border-white/10 bg-white/5 rounded-2xl p-6 space-y-4">
                                         <div className="text-sm font-semibold text-muted-foreground uppercase tracking-widest">
-                                            Question {idx + 1}
+                                            {t('studentCourse.questionLabel', { index: idx + 1 })}
                                         </div>
                                         <div className="text-lg font-semibold">{question.prompt}</div>
                                         <div className="space-y-2">
@@ -282,11 +284,11 @@ export default function StudentCourseView() {
                                 onClick={handleSubmitTest}
                                 className="bg-white text-black font-semibold hover:bg-white/90"
                             >
-                                Submit Test
+                                {t('studentCourse.submitTest')}
                             </Button>
                             {testResult ? (
                                 <div className="text-sm text-muted-foreground">
-                                    Score: <span className="text-foreground font-semibold">{testResult.score}</span> / {testResult.total}
+                                    {t('studentCourse.score', { score: testResult.score, total: testResult.total })}
                                 </div>
                             ) : null}
                         </div>
@@ -302,17 +304,17 @@ export default function StudentCourseView() {
                         ) : (
                             <div className="aspect-video w-full rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center space-y-4 text-muted-foreground">
                                 <PlayCircle className="h-20 w-20 opacity-10" />
-                                <p className="italic font-medium">No video content for this lesson.</p>
-                                <Badge variant="outline" className="border-white/10 text-muted-foreground">Reading Material Only</Badge>
+                                <p className="italic font-medium">{t('studentCourse.noVideo')}</p>
+                                <Badge variant="outline" className="border-white/10 text-muted-foreground">{t('studentCourse.readingOnly')}</Badge>
                             </div>
                         )}
 
                         {/* Additional Content/Resources Section */}
                         {selectedLesson.content && (
                             <div className="glass p-8 rounded-2xl border border-white/10 space-y-4">
-                                <h3 className="text-xl font-bold italic tracking-tight border-b border-white/10 pb-4 flex items-center gap-2">
+                                <h3 className="text-xl font-bold italic tracking-tight border-b border-white/10 pb-4 flex items-center gap-2 uppercase">
                                     <FileText className="h-5 w-5 text-primary" />
-                                    LESSON NOTES
+                                    {t('studentCourse.lessonNotes')}
                                 </h3>
                                 <div className="prose max-w-none text-muted-foreground leading-relaxed whitespace-pre-wrap italic">
                                     {selectedLesson.content}
@@ -322,9 +324,9 @@ export default function StudentCourseView() {
 
                         {selectedLesson.resources && selectedLesson.resources.length > 0 && (
                             <div className="space-y-4">
-                                <h3 className="text-xl font-bold italic tracking-tight flex items-center gap-2">
+                                <h3 className="text-xl font-bold italic tracking-tight flex items-center gap-2 uppercase">
                                     <Download className="h-5 w-5 text-primary" />
-                                    RESOURCES
+                                    {t('studentCourse.resources')}
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {selectedLesson.resources.map((res, idx) => (
@@ -352,8 +354,8 @@ export default function StudentCourseView() {
                     <div className="flex-1 flex flex-col items-center justify-center space-y-6 text-muted-foreground">
                         <BookOpen className="h-24 w-24 opacity-5" />
                         <div className="text-center space-y-2">
-                            <h3 className="text-2xl font-black italic tracking-tighter text-muted-foreground">SELECT A LESSON OR TEST</h3>
-                            <p className="text-sm italic">Choose a topic from the curriculum to start learning.</p>
+                            <h3 className="text-2xl font-black italic tracking-tighter text-muted-foreground uppercase">{t('studentCourse.selectPromptTitle')}</h3>
+                            <p className="text-sm italic">{t('studentCourse.selectPromptSubtitle')}</p>
                         </div>
                     </div>
                 )}
