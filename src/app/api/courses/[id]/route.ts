@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/api-middleware';
-import { getCourseById, updateCourse, deleteCourse } from '@/services/course.service';
+import { updateCourse, deleteCourse } from '@/services/course.service';
 import { UserRole } from '@/types';
 import { verifyToken } from '@/lib/auth-utils';
-import dbConnect from '@/lib/db';
-import Enrollment from '@/models/Enrollment';
+import {
+    assertCourseManageAccess,
+    assertCourseReadAccess,
+    AuthenticatedUser,
+    getErrorMessage,
+    getErrorStatus,
+} from '@/lib/access-control';
 
 /**
  * @route GET /api/courses/[id]
@@ -22,25 +27,10 @@ export const GET = async (
             return NextResponse.json({ message: 'Course id is required' }, { status: 400 });
         }
         const user = getOptionalUser(req);
-        const course = await getCourseById(courseId);
-        if (!course) {
-            return NextResponse.json({ message: 'Course not found' }, { status: 404 });
-        }
-        if (!course.isPublished) {
-            const instructorId =
-                typeof course.instructor === 'string'
-                    ? course.instructor
-                    : (course.instructor as any)?._id?.toString();
-            const isAdmin = user?.role === UserRole.ADMIN;
-            const isInstructor = user?.role === UserRole.TEACHER && instructorId && user?.id === instructorId;
-
-            if (!isAdmin && !isInstructor) {
-                return NextResponse.json({ message: 'Course not available' }, { status: 403 });
-            }
-        }
+        const course = await assertCourseReadAccess(user, courseId);
         return NextResponse.json(course);
-    } catch (error: any) {
-        return NextResponse.json({ message: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        return NextResponse.json({ message: getErrorMessage(error) }, { status: getErrorStatus(error) });
     }
 };
 
@@ -49,13 +39,14 @@ export const GET = async (
  * @desc Update course details
  * @access Private (Admin, Teacher)
  */
-export const PUT = withAuth(async (req, { params }) => {
+export const PUT = withAuth(async (req, { params, user }) => {
     try {
+        await assertCourseManageAccess(user, params.id);
         const body = await req.json();
         const course = await updateCourse(params.id, body);
         return NextResponse.json(course);
-    } catch (error: any) {
-        return NextResponse.json({ message: error.message }, { status: 400 });
+    } catch (error: unknown) {
+        return NextResponse.json({ message: getErrorMessage(error) }, { status: getErrorStatus(error, 400) });
     }
 }, [UserRole.ADMIN, UserRole.TEACHER]);
 
@@ -64,12 +55,13 @@ export const PUT = withAuth(async (req, { params }) => {
  * @desc Delete course
  * @access Private (Admin)
  */
-export const DELETE = withAuth(async (req, { params }) => {
+export const DELETE = withAuth(async (req, { params, user }) => {
     try {
+        await assertCourseManageAccess(user, params.id);
         await deleteCourse(params.id);
         return NextResponse.json({ message: 'Course deleted successfully' });
-    } catch (error: any) {
-        return NextResponse.json({ message: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        return NextResponse.json({ message: getErrorMessage(error) }, { status: getErrorStatus(error) });
     }
 }, [UserRole.ADMIN]);
 
@@ -81,12 +73,5 @@ function getOptionalUser(req: Request) {
         ?.split('=')[1];
     const token = cookieToken || authHeader?.replace('Bearer ', '');
     if (!token) return null;
-    return verifyToken(token);
-}
-
-async function hasEnrollment(studentId?: string, courseId?: string) {
-    if (!studentId || !courseId) return false;
-    await dbConnect();
-    const enrollment = await Enrollment.findOne({ studentId, courseId });
-    return !!enrollment;
+    return verifyToken(token) as AuthenticatedUser | null;
 }

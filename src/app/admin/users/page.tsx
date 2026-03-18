@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useI18n } from '@/context/LanguageContext';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
@@ -34,6 +35,7 @@ const emptyForm: UserForm = { name: '', email: '', password: '' };
 
 export default function AdminUsersPage() {
     const { isAuthenticated, user, loading: authLoading } = useAuth();
+    const { t } = useI18n();
     const router = useRouter();
 
     const [teachers, setTeachers] = useState<UserOption[]>([]);
@@ -181,7 +183,7 @@ export default function AdminUsersPage() {
         const password = teacherCreateForm.password;
 
         if (!name || !email || !password) {
-            toast.error('Name, email and password are required');
+            toast.error(t('adminUsers.mentors.validationCreate'));
             return;
         }
 
@@ -197,14 +199,14 @@ export default function AdminUsersPage() {
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-                throw new Error(data.message || 'Failed to create mentor');
+                throw new Error(data.message || t('adminUsers.mentors.createFailed'));
             }
 
-            toast.success('Mentor created');
+            toast.success(t('adminUsers.mentors.createSuccess'));
             resetTeacherCreateForm();
             await refreshTeachers();
         } catch (error: any) {
-            toast.error(error.message || 'Failed to create mentor');
+            toast.error(error.message || t('adminUsers.mentors.createFailed'));
         }
     };
 
@@ -220,7 +222,7 @@ export default function AdminUsersPage() {
         const password = teacherEditForm.password;
 
         if (!teacherEditForm.id || !name || !email) {
-            toast.error('Name and email are required');
+            toast.error(t('adminUsers.mentors.validationUpdate'));
             return;
         }
 
@@ -236,14 +238,14 @@ export default function AdminUsersPage() {
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-                throw new Error(data.message || 'Failed to update mentor');
+                throw new Error(data.message || t('adminUsers.mentors.updateFailed'));
             }
-            toast.success('Mentor updated');
+            toast.success(t('adminUsers.mentors.updateSuccess'));
             setTeacherEditOpen(false);
             resetTeacherEditForm();
             await refreshTeachers();
         } catch (error: any) {
-            toast.error(error.message || 'Failed to update mentor');
+            toast.error(error.message || t('adminUsers.mentors.updateFailed'));
         }
     };
 
@@ -256,12 +258,12 @@ export default function AdminUsersPage() {
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-                throw new Error(data.message || 'Failed to delete mentor');
+                throw new Error(data.message || t('adminUsers.mentors.deleteFailed'));
             }
             setTeachers((prev) => prev.filter((t) => t._id !== teacherDeleteTarget._id));
-            toast.success('Mentor deleted');
+            toast.success(t('adminUsers.mentors.deleteSuccess'));
         } catch (error: any) {
-            toast.error(error.message || 'Failed to delete mentor');
+            toast.error(error.message || t('adminUsers.mentors.deleteFailed'));
         } finally {
             setTeacherDeleteOpen(false);
             setTeacherDeleteTarget(null);
@@ -275,7 +277,7 @@ export default function AdminUsersPage() {
         const password = studentCreateForm.password;
 
         if (!name || !email || !password) {
-            toast.error('Name, email and password are required');
+            toast.error(t('adminUsers.students.validationCreate'));
             return;
         }
 
@@ -291,14 +293,14 @@ export default function AdminUsersPage() {
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-                throw new Error(data.message || 'Failed to create student');
+                throw new Error(data.message || t('adminUsers.students.createFailed'));
             }
 
-            toast.success('Student created');
+            toast.success(t('adminUsers.students.createSuccess'));
             resetStudentCreateForm();
             await refreshStudents();
         } catch (error: any) {
-            toast.error(error.message || 'Failed to create student');
+            toast.error(error.message || t('adminUsers.students.createFailed'));
         }
     };
 
@@ -314,7 +316,7 @@ export default function AdminUsersPage() {
         const password = studentEditForm.password;
 
         if (!studentEditForm.id || !name || !email) {
-            toast.error('Name and email are required');
+            toast.error(t('adminUsers.students.validationUpdate'));
             return;
         }
 
@@ -330,14 +332,14 @@ export default function AdminUsersPage() {
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-                throw new Error(data.message || 'Failed to update student');
+                throw new Error(data.message || t('adminUsers.students.updateFailed'));
             }
-            toast.success('Student updated');
+            toast.success(t('adminUsers.students.updateSuccess'));
             setStudentEditOpen(false);
             resetStudentEditForm();
             await refreshStudents();
         } catch (error: any) {
-            toast.error(error.message || 'Failed to update student');
+            toast.error(error.message || t('adminUsers.students.updateFailed'));
         }
     };
 
@@ -350,12 +352,12 @@ export default function AdminUsersPage() {
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-                throw new Error(data.message || 'Failed to delete student');
+                throw new Error(data.message || t('adminUsers.students.deleteFailed'));
             }
             setStudents((prev) => prev.filter((s) => s._id !== studentDeleteTarget._id));
-            toast.success('Student deleted');
+            toast.success(t('adminUsers.students.deleteSuccess'));
         } catch (error: any) {
-            toast.error(error.message || 'Failed to delete student');
+            toast.error(error.message || t('adminUsers.students.deleteFailed'));
         } finally {
             setStudentDeleteOpen(false);
             setStudentDeleteTarget(null);
@@ -376,23 +378,23 @@ export default function AdminUsersPage() {
                 <div className="space-y-2">
                     <div className="flex items-center gap-3 text-sm text-muted-foreground uppercase tracking-widest">
                         <Shield className="h-4 w-4 text-primary" />
-                        Admin Users
+                        {t('adminUsers.badge')}
                     </div>
-                    <h1 className="text-4xl font-black tracking-tighter italic">Manage People</h1>
-                    <p className="text-muted-foreground">Create and control mentor and student accounts.</p>
+                    <h1 className="text-4xl font-black tracking-tighter italic">{t('adminUsers.title')}</h1>
+                    <p className="text-muted-foreground">{t('adminUsers.subtitle')}</p>
                 </div>
                 <div className="flex gap-3">
                     <Link
                         href="/admin"
                         className="px-4 py-2 rounded-lg bg-white/10 text-foreground text-sm font-semibold hover:bg-white/20 transition-all border border-white/10"
                     >
-                        Back to Dashboard
+                        {t('adminUsers.links.backToDashboard')}
                     </Link>
                     <Link
                         href="/courses"
                         className="px-4 py-2 rounded-lg bg-white text-black text-sm font-semibold hover:bg-white/90 transition-all"
                     >
-                        Browse Courses
+                        {t('adminUsers.links.browseCourses')}
                     </Link>
                 </div>
             </div>
@@ -401,43 +403,43 @@ export default function AdminUsersPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Users className="h-4 w-4 text-primary" />
-                        Mentor Management
+                        {t('adminUsers.mentors.title')}
                     </CardTitle>
-                    <CardDescription>Create, update, or remove mentors.</CardDescription>
+                    <CardDescription>{t('adminUsers.mentors.description')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <form onSubmit={handleTeacherCreate} className="space-y-4">
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-muted-foreground ml-1">Full name</label>
+                                <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminUsers.fields.fullName')}</label>
                                 <input
                                     type="text"
                                     value={teacherCreateForm.name}
                                     onChange={(e) => setTeacherCreateForm((prev) => ({ ...prev, name: e.target.value }))}
                                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                    placeholder="Mentor name"
+                                    placeholder={t('adminUsers.fields.mentorName')}
                                 />
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-muted-foreground ml-1">Email</label>
+                                <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminUsers.fields.email')}</label>
                                 <input
                                     type="email"
                                     value={teacherCreateForm.email}
                                     onChange={(e) => setTeacherCreateForm((prev) => ({ ...prev, email: e.target.value }))}
                                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                    placeholder="mentor@example.com"
+                                    placeholder={t('adminUsers.fields.mentorEmail')}
                                 />
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-muted-foreground ml-1">Password</label>
+                                <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminUsers.fields.password')}</label>
                                 <input
                                     type="password"
                                     value={teacherCreateForm.password}
                                     onChange={(e) => setTeacherCreateForm((prev) => ({ ...prev, password: e.target.value }))}
                                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                    placeholder="Set a password"
+                                    placeholder={t('adminUsers.fields.passwordPlaceholder')}
                                 />
                             </div>
 
@@ -446,23 +448,23 @@ export default function AdminUsersPage() {
                                     type="submit"
                                     className="w-full py-3 px-4 bg-primary hover:bg-primary-hover text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary/20"
                                 >
-                                    Create Mentor
+                                    {t('adminUsers.mentors.create')}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={resetTeacherCreateForm}
                                     className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 text-foreground font-semibold rounded-xl transition-all border border-white/10"
                                 >
-                                    Clear
+                                    {t('adminUsers.mentors.clear')}
                                 </button>
                             </div>
                         </form>
 
                         <div className="space-y-3">
                             {teacherLoading ? (
-                                <div className="text-sm text-muted-foreground">Loading mentors...</div>
+                                <div className="text-sm text-muted-foreground">{t('adminUsers.mentors.loading')}</div>
                             ) : teachers.length === 0 ? (
-                                <div className="text-sm text-muted-foreground">No mentors yet.</div>
+                                <div className="text-sm text-muted-foreground">{t('adminUsers.mentors.empty')}</div>
                             ) : (
                                 teachers.map((teacher) => (
                                     <div
@@ -479,7 +481,7 @@ export default function AdminUsersPage() {
                                                 onClick={() => handleTeacherEdit(teacher)}
                                                 className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white/10 hover:bg-white/20 transition-all border border-white/10"
                                             >
-                                                Edit
+                                                {t('adminUsers.mentors.edit')}
                                             </button>
                                             <button
                                                 type="button"
@@ -489,7 +491,7 @@ export default function AdminUsersPage() {
                                                 }}
                                                 className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all border border-red-500/20"
                                             >
-                                                Delete
+                                                {t('adminUsers.mentors.delete')}
                                             </button>
                                         </div>
                                     </div>
@@ -504,43 +506,43 @@ export default function AdminUsersPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <GraduationCap className="h-4 w-4 text-green-400" />
-                        Student Management
+                        {t('adminUsers.students.title')}
                     </CardTitle>
-                    <CardDescription>Create, update, or remove students.</CardDescription>
+                    <CardDescription>{t('adminUsers.students.description')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <form onSubmit={handleStudentCreate} className="space-y-4">
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-muted-foreground ml-1">Full name</label>
+                                <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminUsers.fields.fullName')}</label>
                                 <input
                                     type="text"
                                     value={studentCreateForm.name}
                                     onChange={(e) => setStudentCreateForm((prev) => ({ ...prev, name: e.target.value }))}
                                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                    placeholder="Student name"
+                                    placeholder={t('adminUsers.fields.studentName')}
                                 />
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-muted-foreground ml-1">Email</label>
+                                <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminUsers.fields.email')}</label>
                                 <input
                                     type="email"
                                     value={studentCreateForm.email}
                                     onChange={(e) => setStudentCreateForm((prev) => ({ ...prev, email: e.target.value }))}
                                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                    placeholder="student@example.com"
+                                    placeholder={t('adminUsers.fields.studentEmail')}
                                 />
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-muted-foreground ml-1">Password</label>
+                                <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminUsers.fields.password')}</label>
                                 <input
                                     type="password"
                                     value={studentCreateForm.password}
                                     onChange={(e) => setStudentCreateForm((prev) => ({ ...prev, password: e.target.value }))}
                                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                    placeholder="Set a password"
+                                    placeholder={t('adminUsers.fields.passwordPlaceholder')}
                                 />
                             </div>
 
@@ -549,34 +551,34 @@ export default function AdminUsersPage() {
                                     type="submit"
                                     className="w-full py-3 px-4 bg-primary hover:bg-primary-hover text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary/20"
                                 >
-                                    Create Student
+                                    {t('adminUsers.students.create')}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={resetStudentCreateForm}
                                     className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 text-foreground font-semibold rounded-xl transition-all border border-white/10"
                                 >
-                                    Clear
+                                    {t('adminUsers.students.clear')}
                                 </button>
                             </div>
                         </form>
 
                         <div className="space-y-3">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-muted-foreground ml-1">Search students</label>
+                                <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminUsers.students.search')}</label>
                                 <input
                                     type="text"
                                     value={studentQuery}
                                     onChange={(e) => setStudentQuery(e.target.value)}
                                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                    placeholder="Type name or email"
+                                    placeholder={t('adminUsers.students.searchPlaceholder')}
                                 />
                             </div>
 
                             {studentLoading ? (
-                                <div className="text-sm text-muted-foreground">Loading students...</div>
+                                <div className="text-sm text-muted-foreground">{t('adminUsers.students.loading')}</div>
                             ) : students.length === 0 ? (
-                                <div className="text-sm text-muted-foreground">No students found.</div>
+                                <div className="text-sm text-muted-foreground">{t('adminUsers.students.empty')}</div>
                             ) : (
                                 students.map((student) => (
                                     <div
@@ -593,7 +595,7 @@ export default function AdminUsersPage() {
                                                 onClick={() => handleStudentEdit(student)}
                                                 className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white/10 hover:bg-white/20 transition-all border border-white/10"
                                             >
-                                                Edit
+                                                {t('adminUsers.students.edit')}
                                             </button>
                                             <button
                                                 type="button"
@@ -603,7 +605,7 @@ export default function AdminUsersPage() {
                                                 }}
                                                 className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all border border-red-500/20"
                                             >
-                                                Delete
+                                                {t('adminUsers.students.delete')}
                                             </button>
                                         </div>
                                     </div>
@@ -623,38 +625,38 @@ export default function AdminUsersPage() {
             >
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Edit mentor</DialogTitle>
-                        <DialogDescription>Update mentor details and save changes.</DialogDescription>
+                        <DialogTitle>{t('adminUsers.dialogs.editMentorTitle')}</DialogTitle>
+                        <DialogDescription>{t('adminUsers.dialogs.editMentorDescription')}</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleTeacherUpdate} className="space-y-4">
                         <div className="space-y-1">
-                            <label className="text-sm font-medium text-muted-foreground ml-1">Full name</label>
+                            <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminUsers.fields.fullName')}</label>
                             <input
                                 type="text"
                                 value={teacherEditForm.name}
                                 onChange={(e) => setTeacherEditForm((prev) => ({ ...prev, name: e.target.value }))}
                                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                placeholder="Mentor name"
+                                placeholder={t('adminUsers.fields.mentorName')}
                             />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-sm font-medium text-muted-foreground ml-1">Email</label>
+                            <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminUsers.fields.email')}</label>
                             <input
                                 type="email"
                                 value={teacherEditForm.email}
                                 onChange={(e) => setTeacherEditForm((prev) => ({ ...prev, email: e.target.value }))}
                                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                placeholder="mentor@example.com"
+                                placeholder={t('adminUsers.fields.mentorEmail')}
                             />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-sm font-medium text-muted-foreground ml-1">Password</label>
+                            <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminUsers.fields.password')}</label>
                             <input
                                 type="password"
                                 value={teacherEditForm.password}
                                 onChange={(e) => setTeacherEditForm((prev) => ({ ...prev, password: e.target.value }))}
                                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                placeholder="Leave blank to keep current"
+                                placeholder={t('adminUsers.fields.keepCurrentPassword')}
                             />
                         </div>
                         <DialogFooter>
@@ -663,13 +665,13 @@ export default function AdminUsersPage() {
                                 onClick={() => setTeacherEditOpen(false)}
                                 className="w-full sm:w-auto py-2.5 px-4 bg-white/10 hover:bg-white/20 text-foreground font-semibold rounded-xl transition-all border border-white/10"
                             >
-                                Cancel
+                                {t('adminUsers.dialogs.cancel')}
                             </button>
                             <button
                                 type="submit"
                                 className="w-full sm:w-auto py-2.5 px-4 bg-primary hover:bg-primary-hover text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary/20"
                             >
-                                Save changes
+                                {t('adminUsers.dialogs.save')}
                             </button>
                         </DialogFooter>
                     </form>
@@ -685,11 +687,11 @@ export default function AdminUsersPage() {
             >
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Delete mentor</DialogTitle>
+                        <DialogTitle>{t('adminUsers.dialogs.deleteMentorTitle')}</DialogTitle>
                         <DialogDescription>
                             {teacherDeleteTarget
-                                ? `Are you sure you want to delete ${teacherDeleteTarget.name}? This action cannot be undone.`
-                                : 'Are you sure you want to delete this mentor?'}
+                                ? t('adminUsers.dialogs.deleteMentorDescriptionNamed', { name: teacherDeleteTarget.name })
+                                : t('adminUsers.dialogs.deleteMentorDescription')}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -698,14 +700,14 @@ export default function AdminUsersPage() {
                             onClick={() => setTeacherDeleteOpen(false)}
                             className="w-full sm:w-auto py-2.5 px-4 bg-white/10 hover:bg-white/20 text-foreground font-semibold rounded-xl transition-all border border-white/10"
                         >
-                            Cancel
+                            {t('adminUsers.dialogs.cancel')}
                         </button>
                         <button
                             type="button"
                             onClick={handleTeacherDeleteConfirm}
                             className="w-full sm:w-auto py-2.5 px-4 bg-red-500/10 text-red-400 hover:bg-red-500/20 font-semibold rounded-xl transition-all border border-red-500/20"
                         >
-                            Delete mentor
+                            {t('adminUsers.dialogs.deleteMentorConfirm')}
                         </button>
                     </DialogFooter>
                 </DialogContent>
@@ -720,38 +722,38 @@ export default function AdminUsersPage() {
             >
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Edit student</DialogTitle>
-                        <DialogDescription>Update student details and save changes.</DialogDescription>
+                        <DialogTitle>{t('adminUsers.dialogs.editStudentTitle')}</DialogTitle>
+                        <DialogDescription>{t('adminUsers.dialogs.editStudentDescription')}</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleStudentUpdate} className="space-y-4">
                         <div className="space-y-1">
-                            <label className="text-sm font-medium text-muted-foreground ml-1">Full name</label>
+                            <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminUsers.fields.fullName')}</label>
                             <input
                                 type="text"
                                 value={studentEditForm.name}
                                 onChange={(e) => setStudentEditForm((prev) => ({ ...prev, name: e.target.value }))}
                                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                placeholder="Student name"
+                                placeholder={t('adminUsers.fields.studentName')}
                             />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-sm font-medium text-muted-foreground ml-1">Email</label>
+                            <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminUsers.fields.email')}</label>
                             <input
                                 type="email"
                                 value={studentEditForm.email}
                                 onChange={(e) => setStudentEditForm((prev) => ({ ...prev, email: e.target.value }))}
                                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                placeholder="student@example.com"
+                                placeholder={t('adminUsers.fields.studentEmail')}
                             />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-sm font-medium text-muted-foreground ml-1">Password</label>
+                            <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminUsers.fields.password')}</label>
                             <input
                                 type="password"
                                 value={studentEditForm.password}
                                 onChange={(e) => setStudentEditForm((prev) => ({ ...prev, password: e.target.value }))}
                                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                placeholder="Leave blank to keep current"
+                                placeholder={t('adminUsers.fields.keepCurrentPassword')}
                             />
                         </div>
                         <DialogFooter>
@@ -760,13 +762,13 @@ export default function AdminUsersPage() {
                                 onClick={() => setStudentEditOpen(false)}
                                 className="w-full sm:w-auto py-2.5 px-4 bg-white/10 hover:bg-white/20 text-foreground font-semibold rounded-xl transition-all border border-white/10"
                             >
-                                Cancel
+                                {t('adminUsers.dialogs.cancel')}
                             </button>
                             <button
                                 type="submit"
                                 className="w-full sm:w-auto py-2.5 px-4 bg-primary hover:bg-primary-hover text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary/20"
                             >
-                                Save changes
+                                {t('adminUsers.dialogs.save')}
                             </button>
                         </DialogFooter>
                     </form>
@@ -782,11 +784,11 @@ export default function AdminUsersPage() {
             >
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Delete student</DialogTitle>
+                        <DialogTitle>{t('adminUsers.dialogs.deleteStudentTitle')}</DialogTitle>
                         <DialogDescription>
                             {studentDeleteTarget
-                                ? `Are you sure you want to delete ${studentDeleteTarget.name}? This action cannot be undone.`
-                                : 'Are you sure you want to delete this student?'}
+                                ? t('adminUsers.dialogs.deleteStudentDescriptionNamed', { name: studentDeleteTarget.name })
+                                : t('adminUsers.dialogs.deleteStudentDescription')}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -795,14 +797,14 @@ export default function AdminUsersPage() {
                             onClick={() => setStudentDeleteOpen(false)}
                             className="w-full sm:w-auto py-2.5 px-4 bg-white/10 hover:bg-white/20 text-foreground font-semibold rounded-xl transition-all border border-white/10"
                         >
-                            Cancel
+                            {t('adminUsers.dialogs.cancel')}
                         </button>
                         <button
                             type="button"
                             onClick={handleStudentDeleteConfirm}
                             className="w-full sm:w-auto py-2.5 px-4 bg-red-500/10 text-red-400 hover:bg-red-500/20 font-semibold rounded-xl transition-all border border-red-500/20"
                         >
-                            Delete student
+                            {t('adminUsers.dialogs.deleteStudentConfirm')}
                         </button>
                     </DialogFooter>
                 </DialogContent>

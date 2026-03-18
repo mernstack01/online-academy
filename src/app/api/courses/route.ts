@@ -3,6 +3,7 @@ import { withAuth } from '../../../lib/api-middleware';
 import { createCourse, getCourses } from '../../../services/course.service';
 import { UserRole } from '../../../types';
 import { verifyToken } from '../../../lib/auth-utils';
+import { AuthenticatedUser, getErrorMessage } from '@/lib/access-control';
 
 /**
  * @route GET /api/courses
@@ -14,11 +15,23 @@ export const GET = async (req: Request) => {
         const user = getOptionalUser(req);
         const { searchParams } = new URL(req.url);
         const includeDraftsParam = searchParams.get('includeDrafts') === 'true';
-        const includeDrafts = user?.role === UserRole.ADMIN && includeDraftsParam;
-        const courses = await getCourses(includeDrafts ? {} : { isPublished: true });
+        let query: Record<string, unknown> = { isPublished: true };
+
+        if (includeDraftsParam && user?.role === UserRole.ADMIN) {
+            query = {};
+        } else if (includeDraftsParam && user?.role === UserRole.TEACHER) {
+            query = {
+                $or: [
+                    { isPublished: true },
+                    { instructor: user.id },
+                ],
+            };
+        }
+
+        const courses = await getCourses(query);
         return NextResponse.json(courses);
-    } catch (error: any) {
-        return NextResponse.json({ message: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        return NextResponse.json({ message: getErrorMessage(error) }, { status: 500 });
     }
 };
 
@@ -35,8 +48,8 @@ export const POST = withAuth(async (req, { user }) => {
             instructor: user.id,
         });
         return NextResponse.json(course, { status: 201 });
-    } catch (error: any) {
-        return NextResponse.json({ message: error.message }, { status: 400 });
+    } catch (error: unknown) {
+        return NextResponse.json({ message: getErrorMessage(error) }, { status: 400 });
     }
 }, [UserRole.ADMIN, UserRole.TEACHER]);
 
@@ -48,5 +61,5 @@ function getOptionalUser(req: Request) {
         ?.split('=')[1];
     const token = cookieToken || authHeader?.replace('Bearer ', '');
     if (!token) return null;
-    return verifyToken(token);
+    return verifyToken(token) as AuthenticatedUser | null;
 }

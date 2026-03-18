@@ -1,27 +1,18 @@
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/api-middleware';
 import { UserRole } from '@/types';
-import dbConnect from '@/lib/db';
-import Submission from '@/models/Submission';
+import { assertSubmissionManageAccess, getErrorMessage, getErrorStatus } from '@/lib/access-control';
 
 /**
  * @route GET /api/submissions/[id]
  * @desc Get a single submission with student and assignment details
  * @access Private (Admin, Teacher)
  */
-export const GET = withAuth(async (req, { params }) => {
+export const GET = withAuth(async (req, { params, user }) => {
     try {
-        await dbConnect();
-        const submission = await Submission.findById(params.id)
-            .populate('studentId', 'name email')
-            .populate('assignmentId', 'title description dueDate');
-
-        if (!submission) {
-            return NextResponse.json({ message: 'Submission not found' }, { status: 404 });
-        }
-
+        const submission = await assertSubmissionManageAccess(user, params.id);
         return NextResponse.json(submission);
-    } catch (error: any) {
-        return NextResponse.json({ message: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        return NextResponse.json({ message: getErrorMessage(error) }, { status: getErrorStatus(error) });
     }
 }, [UserRole.ADMIN, UserRole.TEACHER]);

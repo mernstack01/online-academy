@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server';
 import { withAuth } from '../../../../../lib/api-middleware';
 import { addLesson, findCourseByModuleId } from '../../../../../services/course.service';
 import { UserRole } from '../../../../../types';
+import { assertCourseManageAccess, getErrorMessage, getErrorStatus } from '@/lib/access-control';
 
 /**
  * @route POST /api/modules/[id]/lessons
  * @desc Add a lesson to a module
  * @access Private (Admin, Teacher)
  */
-export const POST = withAuth(async (req, { params }) => {
+export const POST = withAuth(async (req, { params, user }) => {
     try {
         const body = await req.json();
         if (body.videoUrl && !isValidVideoUrl(body.videoUrl)) {
@@ -19,11 +20,12 @@ export const POST = withAuth(async (req, { params }) => {
         }
         const course = await findCourseByModuleId(params.id);
         if (!course) throw new Error('Course containing this module not found');
+        await assertCourseManageAccess(user, course._id.toString());
 
         const lesson = await addLesson(course._id.toString(), params.id, body);
         return NextResponse.json(lesson, { status: 201 });
-    } catch (error: any) {
-        return NextResponse.json({ message: error.message }, { status: 400 });
+    } catch (error: unknown) {
+        return NextResponse.json({ message: getErrorMessage(error) }, { status: getErrorStatus(error, 400) });
     }
 }, [UserRole.ADMIN, UserRole.TEACHER]);
 

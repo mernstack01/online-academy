@@ -5,6 +5,7 @@ import { UserRole } from '@/types';
 import dbConnect from '@/lib/db';
 import Enrollment from '@/models/Enrollment';
 import Course from '@/models/Course';
+import { getErrorMessage } from '@/lib/access-control';
 
 /**
  * @route POST /api/courses/[id]/enroll
@@ -23,6 +24,13 @@ export const POST = withAuth(async (req, { params, user }) => {
             return NextResponse.json({ message: 'Course not found' }, { status: 404 });
         }
 
+        if (!course.isPublished) {
+            return NextResponse.json(
+                { message: 'Only published courses can be enrolled directly' },
+                { status: 403 }
+            );
+        }
+
         if (course.price > 0) {
             return NextResponse.json(
                 { message: 'Paid course. Please contact admin to enroll.' },
@@ -38,8 +46,8 @@ export const POST = withAuth(async (req, { params, user }) => {
 
         const enrollment = await enrollInCourse(studentId, courseId);
         return NextResponse.json(enrollment, { status: 201 });
-    } catch (error: any) {
-        return NextResponse.json({ message: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        return NextResponse.json({ message: getErrorMessage(error) }, { status: 500 });
     }
 }, [UserRole.STUDENT]);
 
@@ -57,7 +65,7 @@ export const GET = withAuth(async (req, { params, user }) => {
         const enrollment = await Enrollment.findOne({ studentId, courseId });
 
         return NextResponse.json({ isEnrolled: !!enrollment });
-    } catch (error: any) {
-        return NextResponse.json({ message: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        return NextResponse.json({ message: getErrorMessage(error) }, { status: 500 });
     }
 }, [UserRole.STUDENT]);

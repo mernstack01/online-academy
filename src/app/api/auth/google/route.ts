@@ -14,8 +14,7 @@ type GoogleTokenInfo = {
   given_name?: string;
 };
 
-const GOOGLE_CLIENT_ID =
-  process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
 export async function POST(req: Request) {
   try {
@@ -46,6 +45,10 @@ export async function POST(req: Request) {
     const email = String(tokenInfo.email || '').toLowerCase();
     if (!email) {
       return NextResponse.json({ message: 'Google account has no email' }, { status: 400 });
+    }
+
+    if (tokenInfo.email_verified !== 'true') {
+      return NextResponse.json({ message: 'Google account email is not verified' }, { status: 401 });
     }
 
     await dbConnect();

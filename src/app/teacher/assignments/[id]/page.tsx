@@ -15,6 +15,11 @@ type GradeDraft = {
     teacherComment: string;
 };
 
+type SubmissionStudent = {
+    name?: string;
+    email?: string;
+};
+
 export default function TeacherAssignmentDetail() {
     const params = useParams();
     const router = useRouter();
@@ -24,6 +29,7 @@ export default function TeacherAssignmentDetail() {
     const [assignment, setAssignment] = useState<IAssignment | null>(null);
     const [submissions, setSubmissions] = useState<ISubmission[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState('');
     const [gradingId, setGradingId] = useState<string | null>(null);
     const [drafts, setDrafts] = useState<Record<string, GradeDraft>>({});
 
@@ -50,6 +56,10 @@ export default function TeacherAssignmentDetail() {
                 if (assignmentRes.ok) {
                     const data = await assignmentRes.json();
                     setAssignment(data);
+                    setLoadError('');
+                } else {
+                    const data = await assignmentRes.json().catch(() => ({}));
+                    setLoadError(data.message || 'Assignment could not be loaded');
                 }
                 if (submissionsRes.ok) {
                     const data = await submissionsRes.json();
@@ -117,7 +127,19 @@ export default function TeacherAssignmentDetail() {
         );
     }
 
-    if (!assignment) return null;
+    if (!assignment) {
+        return (
+            <div className="min-h-screen bg-background text-foreground p-8 flex items-center justify-center">
+                <div className="max-w-lg text-center space-y-4">
+                    <h2 className="text-2xl font-black italic">Assignment unavailable</h2>
+                    <p className="text-muted-foreground">{loadError || 'This assignment could not be loaded.'}</p>
+                    <Button type="button" onClick={() => router.push('/teacher/dashboard')}>
+                        Back to Dashboard
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background text-foreground py-12 px-6 md:px-12 space-y-8">
@@ -145,7 +167,10 @@ export default function TeacherAssignmentDetail() {
                         <div className="text-muted-foreground italic text-center py-10">No submissions yet.</div>
                     )}
 
-                    {submissions.map((submission) => (
+                    {submissions.map((submission) => {
+                        const student = submission.studentId as SubmissionStudent;
+
+                        return (
                         <div key={submission._id} className="border border-white/10 rounded-2xl p-4 space-y-4">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                                 <div className="flex items-center gap-3">
@@ -153,8 +178,8 @@ export default function TeacherAssignmentDetail() {
                                         <User2 className="h-4 w-4 text-muted-foreground" />
                                     </div>
                                     <div>
-                                        <div className="font-semibold">{(submission.studentId as any)?.name || 'Student'}</div>
-                                        <div className="text-xs text-muted-foreground">{(submission.studentId as any)?.email}</div>
+                                        <div className="font-semibold">{student?.name || 'Student'}</div>
+                                        <div className="text-xs text-muted-foreground">{student?.email}</div>
                                     </div>
                                 </div>
                                 <Badge className={`${submission.status === 'graded' ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-muted-foreground'} border-none`}>
@@ -201,7 +226,8 @@ export default function TeacherAssignmentDetail() {
                                 </Button>
                             </div>
                         </div>
-                    ))}
+                        );
+                    })}
                 </CardContent>
             </Card>
         </div>

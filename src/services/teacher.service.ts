@@ -2,6 +2,7 @@ import dbConnect from '@/lib/db';
 import Course from '@/models/Course';
 import Assignment from '@/models/Assignment';
 import Submission from '@/models/Submission';
+import Enrollment from '@/models/Enrollment';
 
 /**
  * Teacher Dashboard Services
@@ -41,8 +42,31 @@ export const getTeacherDashboardStats = async (teacherId: string) => {
         })
         .sort('-createdAt');
 
+    const enrollmentCounts = await Enrollment.aggregate([
+        {
+            $match: {
+                courseId: { $in: courses.map((course) => course._id) },
+            },
+        },
+        {
+            $group: {
+                _id: '$courseId',
+                total: { $sum: 1 },
+            },
+        },
+    ]);
+
+    const enrollmentCountMap = new Map(
+        enrollmentCounts.map((item) => [item._id.toString(), item.total as number])
+    );
+
+    const coursesWithStudentCount = courses.map((course) => ({
+        ...course.toObject(),
+        studentCount: enrollmentCountMap.get((course._id as any).toString()) ?? 0,
+    }));
+
     return {
-        courses,
+        courses: coursesWithStudentCount,
         assignments,
         pendingSubmissions,
         stats: {

@@ -28,16 +28,17 @@ export const getAssignmentById = async (id: string) => {
 
 export const submitAssignment = async (submissionData: Partial<ISubmission>) => {
     await dbConnect();
-    // Check if student already submitted for this assignment
     const existing = await Submission.findOne({
         assignmentId: submissionData.assignmentId,
         studentId: submissionData.studentId,
     });
 
     if (existing) {
-        // Update existing submission or throw error? Usually, we allow resubmission.
         existing.fileUrl = submissionData.fileUrl || existing.fileUrl;
-        existing.status = 'pending'; // Reset status if it was graded
+        existing.comment = submissionData.comment || '';
+        existing.status = 'pending';
+        existing.grade = undefined;
+        existing.teacherComment = undefined;
         return await existing.save();
     }
 

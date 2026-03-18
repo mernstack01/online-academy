@@ -9,6 +9,15 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft, Send } from 'lucide-react';
 
+type SubmissionStudent = {
+    name?: string;
+    email?: string;
+};
+
+type SubmissionAssignment = {
+    title?: string;
+};
+
 export default function TeacherSubmissionDetail() {
     const params = useParams();
     const router = useRouter();
@@ -17,6 +26,7 @@ export default function TeacherSubmissionDetail() {
 
     const [submission, setSubmission] = useState<ISubmission | null>(null);
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState('');
     const [grade, setGrade] = useState('');
     const [teacherComment, setTeacherComment] = useState('');
     const [saving, setSaving] = useState(false);
@@ -35,14 +45,18 @@ export default function TeacherSubmissionDetail() {
 
         const loadSubmission = async () => {
             try {
-            const res = await fetch(`/api/submissions/${submissionId}`, { headers: getAuthHeaders() });
-            if (res.ok) {
-                const data = await res.json();
-                setSubmission(data);
+                const res = await fetch(`/api/submissions/${submissionId}`, { headers: getAuthHeaders() });
+                if (res.ok) {
+                    const data = await res.json();
+                    setSubmission(data);
                     if (data.grade !== undefined && data.grade !== null) {
                         setGrade(String(data.grade));
                     }
                     setTeacherComment(data.teacherComment || '');
+                    setLoadError('');
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    setLoadError(data.message || 'Submission could not be loaded');
                 }
             } catch (error) {
                 console.error('Failed to load submission:', error);
@@ -93,7 +107,22 @@ export default function TeacherSubmissionDetail() {
         );
     }
 
-    if (!submission) return null;
+    if (!submission) {
+        return (
+            <div className="min-h-screen bg-background text-foreground p-8 flex items-center justify-center">
+                <div className="max-w-lg text-center space-y-4">
+                    <h2 className="text-2xl font-black italic">Submission unavailable</h2>
+                    <p className="text-muted-foreground">{loadError || 'This submission could not be loaded.'}</p>
+                    <Button type="button" onClick={() => router.push('/teacher/dashboard')}>
+                        Back to Dashboard
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
+    const student = submission.studentId as SubmissionStudent;
+    const assignment = submission.assignmentId as SubmissionAssignment;
 
     return (
         <div className="min-h-screen bg-background text-foreground py-12 px-6 md:px-12 space-y-8">
@@ -111,12 +140,12 @@ export default function TeacherSubmissionDetail() {
                     <CardContent className="space-y-4 text-sm text-muted-foreground">
                         <div>
                             <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Student</div>
-                            <div className="text-foreground">{(submission.studentId as any)?.name || 'Student'}</div>
-                            <div className="text-muted-foreground">{(submission.studentId as any)?.email}</div>
+                            <div className="text-foreground">{student?.name || 'Student'}</div>
+                            <div className="text-muted-foreground">{student?.email}</div>
                         </div>
                         <div>
                             <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Assignment</div>
-                            <div className="text-foreground">{(submission.assignmentId as any)?.title || 'Assignment'}</div>
+                            <div className="text-foreground">{assignment?.title || 'Assignment'}</div>
                         </div>
                         <div>
                             <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Submission Link</div>

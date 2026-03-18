@@ -186,7 +186,7 @@ Online Academy is a learning management platform where teachers create courses, 
 - `grade`
 - `teacherComment`
 
-### Enrollment
+### Enrollment 
 - `studentId`
 - `courseId`
 - `status` (active | completed)

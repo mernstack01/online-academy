@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useI18n } from '@/context/LanguageContext';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -38,6 +39,7 @@ interface TeacherOption {
 
 export default function AdminDashboard() {
     const { isAuthenticated, user, loading: authLoading } = useAuth();
+    const { t } = useI18n();
     const router = useRouter();
     const [stats, setStats] = useState<AdminStats | null>(null);
     const [loading, setLoading] = useState(true);
@@ -172,7 +174,7 @@ export default function AdminDashboard() {
         const courseId = enrollCourse.trim();
 
         if (!student || !courseId) {
-            setEnrollMessage({ type: 'error', text: 'Select a student and a course' });
+            setEnrollMessage({ type: 'error', text: t('adminDashboard.enrollment.validation') });
             return;
         }
 
@@ -188,16 +190,16 @@ export default function AdminDashboard() {
             });
             const data = await res.json().catch(() => ({}));
             if (res.ok) {
-                setEnrollMessage({ type: 'success', text: 'Student enrolled successfully' });
+                setEnrollMessage({ type: 'success', text: t('adminDashboard.enrollment.success') });
                 setSelectedStudentId('');
                 setEnrollCourse('');
                 setStudentQuery('');
                 setStudents([]);
             } else {
-                setEnrollMessage({ type: 'error', text: data.message || 'Failed to enroll student' });
+                setEnrollMessage({ type: 'error', text: data.message || t('adminDashboard.enrollment.failed') });
             }
         } catch (error: any) {
-            setEnrollMessage({ type: 'error', text: error.message || 'Failed to enroll student' });
+            setEnrollMessage({ type: 'error', text: error.message || t('adminDashboard.enrollment.failed') });
         } finally {
             setEnrollLoading(false);
         }
@@ -215,7 +217,7 @@ export default function AdminDashboard() {
         const password = teacherForm.password;
 
         if (!name || !email || (!teacherForm.id && !password)) {
-            setTeacherMessage({ type: 'error', text: 'Name, email and password are required' });
+            setTeacherMessage({ type: 'error', text: t('adminDashboard.mentors.validation') });
             return;
         }
 
@@ -233,12 +235,12 @@ export default function AdminDashboard() {
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-                throw new Error(data.message || 'Failed to save mentor');
+                throw new Error(data.message || t('adminDashboard.mentors.saveFailed'));
             }
 
             setTeacherMessage({
                 type: 'success',
-                text: teacherForm.id ? 'Mentor updated' : 'Mentor created',
+                text: teacherForm.id ? t('adminDashboard.mentors.updateSuccess') : t('adminDashboard.mentors.createSuccess'),
             });
             resetTeacherForm();
             const listRes = await fetch('/api/admin/teachers', { headers: getAuthHeaders() });
@@ -247,7 +249,7 @@ export default function AdminDashboard() {
                 setTeachers(Array.isArray(list) ? list : []);
             }
         } catch (error: any) {
-            setTeacherMessage({ type: 'error', text: error.message || 'Failed to save mentor' });
+            setTeacherMessage({ type: 'error', text: error.message || t('adminDashboard.mentors.saveFailed') });
         }
     };
 
@@ -264,12 +266,12 @@ export default function AdminDashboard() {
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-                throw new Error(data.message || 'Failed to delete mentor');
+                throw new Error(data.message || t('adminDashboard.mentors.deleteFailed'));
             }
             setTeachers((prev) => prev.filter((t) => t._id !== teacherId));
-            setTeacherMessage({ type: 'success', text: 'Mentor deleted' });
+            setTeacherMessage({ type: 'success', text: t('adminDashboard.mentors.deleteSuccess') });
         } catch (error: any) {
-            setTeacherMessage({ type: 'error', text: error.message || 'Failed to delete mentor' });
+            setTeacherMessage({ type: 'error', text: error.message || t('adminDashboard.mentors.deleteFailed') });
         }
     };
 
@@ -290,17 +292,17 @@ export default function AdminDashboard() {
                 <div className="space-y-2">
                     <div className="flex items-center gap-3 text-sm text-muted-foreground uppercase tracking-widest">
                         <Shield className="h-4 w-4 text-primary" />
-                        Admin Control Room
+                        {t('adminDashboard.badge')}
                     </div>
-                    <h1 className="text-4xl font-black tracking-tighter italic">Platform Overview</h1>
-                    <p className="text-muted-foreground">Monitor growth, courses, and student progress in real time.</p>
+                    <h1 className="text-4xl font-black tracking-tighter italic">{t('adminDashboard.title')}</h1>
+                    <p className="text-muted-foreground">{t('adminDashboard.subtitle')}</p>
                 </div>
                 <div className="flex gap-3">
                     <Link href="/teacher/dashboard" className="px-4 py-2 rounded-lg bg-white text-black text-sm font-semibold hover:bg-white/90 transition-all">
-                        Teacher View
+                        {t('adminDashboard.links.teacherView')}
                     </Link>
                     <Link href="/courses" className="px-4 py-2 rounded-lg bg-white/10 text-foreground text-sm font-semibold hover:bg-white/20 transition-all border border-white/10">
-                        Browse Courses
+                        {t('adminDashboard.links.browseCourses')}
                     </Link>
                 </div>
             </div>
@@ -308,7 +310,7 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Teachers</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">{t('adminDashboard.stats.teachers')}</CardTitle>
                         <Users className="h-4 w-4 text-primary" />
                     </CardHeader>
                     <CardContent>
@@ -318,7 +320,7 @@ export default function AdminDashboard() {
 
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Courses</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">{t('adminDashboard.stats.courses')}</CardTitle>
                         <BookOpen className="h-4 w-4 text-blue-400" />
                     </CardHeader>
                     <CardContent>
@@ -328,7 +330,7 @@ export default function AdminDashboard() {
 
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Students</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">{t('adminDashboard.stats.students')}</CardTitle>
                         <GraduationCap className="h-4 w-4 text-green-400" />
                     </CardHeader>
                     <CardContent>
@@ -338,7 +340,7 @@ export default function AdminDashboard() {
 
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Submissions</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">{t('adminDashboard.stats.submissions')}</CardTitle>
                         <ClipboardCheck className="h-4 w-4 text-orange-400" />
                     </CardHeader>
                     <CardContent>
@@ -349,26 +351,26 @@ export default function AdminDashboard() {
 
             <Card className="bg-white/5 border-white/10">
                 <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                    <CardDescription>Jump into the most common admin workflows.</CardDescription>
+                    <CardTitle>{t('adminDashboard.quickActions.title')}</CardTitle>
+                    <CardDescription>{t('adminDashboard.quickActions.description')}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col md:flex-row gap-4">
                     <Link href="/teacher/courses/new" className="flex-1 px-4 py-3 rounded-xl bg-white text-black font-semibold text-center hover:bg-white/90 transition-all">
-                        Create New Course
+                        {t('adminDashboard.quickActions.createCourse')}
                     </Link>
                     <Link href="/admin/users" className="flex-1 px-4 py-3 rounded-xl bg-white/10 text-foreground font-semibold text-center hover:bg-white/20 transition-all border border-white/10">
-                        Manage Users
+                        {t('adminDashboard.quickActions.manageUsers')}
                     </Link>
                     <Link href="/teacher/dashboard" className="flex-1 px-4 py-3 rounded-xl bg-white/10 text-foreground font-semibold text-center hover:bg-white/20 transition-all border border-white/10">
-                        Review Teacher Stats
+                        {t('adminDashboard.quickActions.reviewTeacherStats')}
                     </Link>
                 </CardContent>
             </Card>
 
             <Card className="bg-white/5 border-white/10">
                 <CardHeader>
-                    <CardTitle>Mentor Management</CardTitle>
-                    <CardDescription>Create, update, or remove mentors.</CardDescription>
+                    <CardTitle>{t('adminDashboard.mentors.title')}</CardTitle>
+                    <CardDescription>{t('adminDashboard.mentors.description')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -386,18 +388,18 @@ export default function AdminDashboard() {
                             )}
 
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-muted-foreground ml-1">Full name</label>
+                                <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminDashboard.mentors.fullName')}</label>
                                 <input
                                     type="text"
                                     value={teacherForm.name}
                                     onChange={(e) => setTeacherForm((prev) => ({ ...prev, name: e.target.value }))}
                                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                    placeholder="Mentor name"
+                                    placeholder={t('adminDashboard.mentors.namePlaceholder')}
                                 />
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-muted-foreground ml-1">Email</label>
+                                <label className="text-sm font-medium text-muted-foreground ml-1">{t('auth.labels.email')}</label>
                                 <input
                                     type="email"
                                     value={teacherForm.email}
@@ -408,13 +410,13 @@ export default function AdminDashboard() {
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-muted-foreground ml-1">Password</label>
+                                <label className="text-sm font-medium text-muted-foreground ml-1">{t('auth.labels.password')}</label>
                                 <input
                                     type="password"
                                     value={teacherForm.password}
                                     onChange={(e) => setTeacherForm((prev) => ({ ...prev, password: e.target.value }))}
                                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                    placeholder={teacherForm.id ? 'Leave blank to keep current' : 'Set a password'}
+                                    placeholder={teacherForm.id ? t('adminDashboard.mentors.passwordKeepCurrent') : t('adminDashboard.mentors.passwordPlaceholder')}
                                 />
                             </div>
 
@@ -423,7 +425,7 @@ export default function AdminDashboard() {
                                     type="submit"
                                     className="w-full py-3 px-4 bg-primary hover:bg-primary-hover text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary/20"
                                 >
-                                    {teacherForm.id ? 'Update Mentor' : 'Create Mentor'}
+                                    {teacherForm.id ? t('adminDashboard.mentors.update') : t('adminDashboard.mentors.create')}
                                 </button>
                                 {teacherForm.id ? (
                                     <button
@@ -431,7 +433,7 @@ export default function AdminDashboard() {
                                         onClick={resetTeacherForm}
                                         className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 text-foreground font-semibold rounded-xl transition-all border border-white/10"
                                     >
-                                        Cancel
+                                        {t('adminDashboard.mentors.cancel')}
                                     </button>
                                 ) : null}
                             </div>
@@ -439,9 +441,9 @@ export default function AdminDashboard() {
 
                         <div className="space-y-3">
                             {teacherLoading ? (
-                                <div className="text-sm text-muted-foreground">Loading mentors...</div>
+                                <div className="text-sm text-muted-foreground">{t('adminDashboard.mentors.loading')}</div>
                             ) : teachers.length === 0 ? (
-                                <div className="text-sm text-muted-foreground">No mentors yet.</div>
+                                <div className="text-sm text-muted-foreground">{t('adminDashboard.mentors.empty')}</div>
                             ) : (
                                 teachers.map((teacher) => (
                                     <div
@@ -458,14 +460,14 @@ export default function AdminDashboard() {
                                                 onClick={() => handleTeacherEdit(teacher)}
                                                 className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white/10 hover:bg-white/20 transition-all border border-white/10"
                                             >
-                                                Edit
+                                                {t('adminDashboard.mentors.edit')}
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => handleTeacherDelete(teacher._id)}
                                                 className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all border border-red-500/20"
                                             >
-                                                Delete
+                                                {t('adminDashboard.mentors.delete')}
                                             </button>
                                         </div>
                                     </div>
@@ -478,8 +480,8 @@ export default function AdminDashboard() {
 
             <Card className="bg-white/5 border-white/10">
                 <CardHeader>
-                    <CardTitle>Manual Enrollment</CardTitle>
-                    <CardDescription>Grant course access after payment.</CardDescription>
+                    <CardTitle>{t('adminDashboard.enrollment.title')}</CardTitle>
+                    <CardDescription>{t('adminDashboard.enrollment.description')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleManualEnroll} className="space-y-4 max-w-xl">
@@ -496,19 +498,19 @@ export default function AdminDashboard() {
                         )}
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-muted-foreground ml-1">Search student</label>
+                            <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminDashboard.enrollment.searchStudent')}</label>
                             <input
                                 type="text"
                                 value={studentQuery}
                                 onChange={(e) => setStudentQuery(e.target.value)}
                                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                                placeholder="Type name or email"
+                                placeholder={t('adminDashboard.enrollment.searchPlaceholder')}
                             />
 
                             {studentLoading ? (
-                                <div className="text-xs text-muted-foreground">Loading students...</div>
+                                <div className="text-xs text-muted-foreground">{t('adminDashboard.enrollment.loadingStudents')}</div>
                             ) : students.length === 0 ? (
-                                <div className="text-xs text-muted-foreground">No students found</div>
+                                <div className="text-xs text-muted-foreground">{t('adminDashboard.enrollment.noStudents')}</div>
                             ) : null}
 
                             <Select
@@ -516,11 +518,11 @@ export default function AdminDashboard() {
                                 onValueChange={(value) => setSelectedStudentId(value ?? '')}
                             >
                                 <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select a student" />
+                                    <SelectValue placeholder={t('adminDashboard.enrollment.selectStudent')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectGroup>
-                                        <SelectLabel>Students</SelectLabel>
+                                        <SelectLabel>{t('adminDashboard.enrollment.studentsLabel')}</SelectLabel>
                                         {students.map((student) => (
                                             <SelectItem key={student._id} value={student._id}>
                                                 {student.name} — {student.email}
@@ -532,21 +534,21 @@ export default function AdminDashboard() {
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-sm font-medium text-muted-foreground ml-1">Course</label>
+                            <label className="text-sm font-medium text-muted-foreground ml-1">{t('adminDashboard.enrollment.course')}</label>
                             <Select
                                 value={enrollCourse || null}
                                 onValueChange={(value) => setEnrollCourse(value ?? '')}
                                 disabled={coursesLoading}
                             >
                                 <SelectTrigger className="w-full">
-                                    <SelectValue placeholder={coursesLoading ? 'Loading courses...' : 'Select a course'} />
+                                    <SelectValue placeholder={coursesLoading ? t('adminDashboard.enrollment.loadingCourses') : t('adminDashboard.enrollment.selectCourse')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectGroup>
-                                        <SelectLabel>Courses</SelectLabel>
+                                        <SelectLabel>{t('adminDashboard.enrollment.coursesLabel')}</SelectLabel>
                                         {courses.map((course) => (
                                             <SelectItem key={course._id} value={course._id}>
-                                                {course.title} {course.price > 0 ? `($${course.price})` : '(FREE)'}
+                                                {course.title} {course.price > 0 ? `($${course.price})` : `(${t('courses.freeBadge')})`}
                                             </SelectItem>
                                         ))}
                                     </SelectGroup>
@@ -559,7 +561,7 @@ export default function AdminDashboard() {
                             disabled={enrollLoading}
                             className="w-full py-3 px-4 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary/20"
                         >
-                            {enrollLoading ? 'Enrolling...' : 'Enroll Student'}
+                            {enrollLoading ? t('adminDashboard.enrollment.submitting') : t('adminDashboard.enrollment.submit')}
                         </button>
                     </form>
                 </CardContent>

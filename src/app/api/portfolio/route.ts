@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/api-middleware';
 import { addToPortfolio, getStudentPortfolio } from '@/services/portfolio.service';
 import { UserRole } from '@/types';
+import { assertSubmissionOwnership, getErrorMessage, getErrorStatus } from '@/lib/access-control';
 
 /**
  * @route POST /api/portfolio
@@ -11,13 +12,18 @@ import { UserRole } from '@/types';
 export const POST = withAuth(async (req, { user }) => {
     try {
         const body = await req.json();
+        if (!body.submissionId) {
+            return NextResponse.json({ message: 'submissionId is required' }, { status: 400 });
+        }
+
+        await assertSubmissionOwnership(user.id, body.submissionId);
         const portfolioItem = await addToPortfolio({
             ...body,
             studentId: user.id,
         });
         return NextResponse.json(portfolioItem, { status: 201 });
-    } catch (error: any) {
-        return NextResponse.json({ message: error.message }, { status: 400 });
+    } catch (error: unknown) {
+        return NextResponse.json({ message: getErrorMessage(error) }, { status: getErrorStatus(error, 400) });
     }
 }, [UserRole.STUDENT]);
 
@@ -30,7 +36,7 @@ export const GET = withAuth(async (req, { user }) => {
     try {
         const portfolio = await getStudentPortfolio(user.id);
         return NextResponse.json(portfolio);
-    } catch (error: any) {
-        return NextResponse.json({ message: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        return NextResponse.json({ message: getErrorMessage(error) }, { status: 500 });
     }
 }, [UserRole.STUDENT]);

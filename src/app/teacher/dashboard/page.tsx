@@ -15,6 +15,7 @@ import {
 import { BookOpen, ClipboardList, AlertCircle, Users, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { useI18n } from '@/context/LanguageContext';
 import { useRouter } from 'next/navigation';
 import { UserRole } from '@/types';
 
@@ -31,6 +32,7 @@ interface TeacherStats {
 
 export default function TeacherDashboard() {
     const { isAuthenticated, user, loading: authLoading } = useAuth();
+    const { t, language } = useI18n();
     const router = useRouter();
     const [data, setData] = useState<TeacherStats | null>(null);
     const [loading, setLoading] = useState(true);
@@ -76,7 +78,7 @@ export default function TeacherDashboard() {
                 router.push(`/teacher/courses/${course._id}`);
             } else {
                 const data = await res.json();
-                alert(data.message || 'Failed to seed course');
+                alert(data.message || t('teacherDashboard.alerts.seedFailed'));
             }
         } catch (error) {
             console.error('Seed course failed:', error);
@@ -101,20 +103,20 @@ export default function TeacherDashboard() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                        Teacher Dashboard
+                        {t('teacherDashboard.title')}
                     </h1>
-                    <p className="text-muted-foreground mt-2">Manage your courses and evaluate student progress.</p>
+                    <p className="text-muted-foreground mt-2">{t('teacherDashboard.subtitle')}</p>
                 </div>
                 <div className="flex gap-3">
                     <Link href="/teacher/courses/new" className="bg-white text-black px-4 py-2 rounded-lg font-semibold hover:bg-white/90 transition-all text-sm">
-                        Create Course
+                        {t('teacherDashboard.actions.createCourse')}
                     </Link>
                     <button
                         onClick={handleSeedCourse}
                         disabled={seeding}
                         className="bg-white/10 text-foreground px-4 py-2 rounded-lg font-semibold hover:bg-white/20 transition-all text-sm border border-white/10 disabled:opacity-60"
                     >
-                        {seeding ? 'Seeding...' : 'Seed Demo Course'}
+                        {seeding ? t('teacherDashboard.actions.seeding') : t('teacherDashboard.actions.seedCourse')}
                     </button>
                 </div>
             </div>
@@ -123,7 +125,7 @@ export default function TeacherDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">My Courses</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">{t('teacherDashboard.stats.myCourses')}</CardTitle>
                         <BookOpen className="h-4 w-4 text-blue-400" />
                     </CardHeader>
                     <CardContent>
@@ -133,7 +135,7 @@ export default function TeacherDashboard() {
 
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Assignments</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">{t('teacherDashboard.stats.totalAssignments')}</CardTitle>
                         <ClipboardList className="h-4 w-4 text-purple-400" />
                     </CardHeader>
                     <CardContent>
@@ -143,7 +145,7 @@ export default function TeacherDashboard() {
 
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm border-orange-500/20">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-orange-400">Needs Grading</CardTitle>
+                        <CardTitle className="text-sm font-medium text-orange-400">{t('teacherDashboard.stats.needsGrading')}</CardTitle>
                         <AlertCircle className="h-4 w-4 text-orange-400" />
                     </CardHeader>
                     <CardContent>
@@ -156,32 +158,32 @@ export default function TeacherDashboard() {
             <Tabs defaultValue="grading" className="space-y-4">
                 <TabsList className="bg-white/5 border-white/10">
                     <TabsTrigger value="grading" className="relative">
-                        Grading Queue
+                        {t('teacherDashboard.tabs.grading')}
                         {data.stats.pendingGrading > 0 && (
                             <span className="ml-2 bg-orange-500 text-white text-[10px] h-4 w-4 flex items-center justify-center rounded-full">
                                 {data.stats.pendingGrading}
                             </span>
                         )}
                     </TabsTrigger>
-                    <TabsTrigger value="courses">My Courses</TabsTrigger>
-                    <TabsTrigger value="assignments">Assignments</TabsTrigger>
+                    <TabsTrigger value="courses">{t('teacherDashboard.tabs.courses')}</TabsTrigger>
+                    <TabsTrigger value="assignments">{t('teacherDashboard.tabs.assignments')}</TabsTrigger>
                 </TabsList>
 
                 {/* Grading Queue Tab */}
                 <TabsContent value="grading">
                     <Card className="bg-white/5 border-white/10">
                         <CardHeader>
-                            <CardTitle>Submissions to Grade</CardTitle>
-                            <CardDescription>Review and provide feedback to student work.</CardDescription>
+                            <CardTitle>{t('teacherDashboard.grading.title')}</CardTitle>
+                            <CardDescription>{t('teacherDashboard.grading.subtitle')}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Table>
                                 <TableHeader>
                                     <TableRow className="border-white/10 hover:bg-transparent">
-                                        <TableHead className="text-muted-foreground">Student</TableHead>
-                                        <TableHead className="text-muted-foreground">Assignment</TableHead>
-                                        <TableHead className="text-muted-foreground">Date</TableHead>
-                                        <TableHead className="text-muted-foreground text-right">Action</TableHead>
+                                        <TableHead className="text-muted-foreground">{t('teacherDashboard.grading.student')}</TableHead>
+                                        <TableHead className="text-muted-foreground">{t('teacherDashboard.grading.assignment')}</TableHead>
+                                        <TableHead className="text-muted-foreground">{t('teacherDashboard.grading.date')}</TableHead>
+                                        <TableHead className="text-muted-foreground text-right">{t('teacherDashboard.grading.action')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -197,11 +199,11 @@ export default function TeacherDashboard() {
                                             </TableCell>
                                             <TableCell className="text-muted-foreground">{sub.assignmentId.title}</TableCell>
                                             <TableCell className="text-muted-foreground">
-                                                {new Date(sub.createdAt).toLocaleDateString()}
+                                                {new Date(sub.createdAt).toLocaleDateString(language === 'uz' ? 'uz-UZ' : 'en-US')}
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <Link href={`/teacher/submissions/${sub._id}`} className="inline-flex items-center gap-1 text-xs bg-white text-black px-3 py-1.5 rounded-md font-medium hover:bg-white/90">
-                                                    Grade Item
+                                                    {t('teacherDashboard.grading.gradeItem')}
                                                 </Link>
                                             </TableCell>
                                         </TableRow>
@@ -210,7 +212,7 @@ export default function TeacherDashboard() {
                                         <TableRow>
                                             <TableCell colSpan={4} className="text-center py-12">
                                                 <CheckCircle className="h-12 w-12 text-green-500/20 mx-auto mb-4" />
-                                                <p className="text-muted-foreground">Inbox zero! No submissions waiting for grading.</p>
+                                                <p className="text-muted-foreground">{t('teacherDashboard.grading.empty')}</p>
                                             </TableCell>
                                         </TableRow>
                                     )}
@@ -222,48 +224,56 @@ export default function TeacherDashboard() {
 
                 {/* Courses Management Tab */}
                 <TabsContent value="courses">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {data.courses.map((course) => (
-                            <Card key={course._id} className="bg-white/5 border-white/10 group overflow-hidden hover:border-white/20 transition-all">
-                                <div className="aspect-video bg-white/5 relative">
-                                    {course.thumbnail && (
-                                        <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
-                                    )}
-                                    <Badge className={`absolute top-3 right-3 ${course.isPublished ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-muted-foreground'} border-none`}>
-                                        {course.isPublished ? 'Published' : 'Draft'}
-                                    </Badge>
-                                </div>
-                                <CardHeader>
-                                    <CardTitle className="text-lg italic">{course.title}</CardTitle>
-                                    <CardDescription className="line-clamp-2 text-muted-foreground">{course.description}</CardDescription>
-                                </CardHeader>
-                                <CardContent className="flex justify-between items-center text-xs text-muted-foreground border-t border-white/5 pt-4">
-                                    <div className="flex items-center gap-1">
-                                        <Users className="h-3 w-3" />
-                                        <span>12 Students</span>
+                    {data.courses.length === 0 ? (
+                        <Card className="bg-white/5 border-white/10">
+                            <CardContent className="py-12 text-center text-muted-foreground">
+                                {t('teacherDashboard.courses.empty')}
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {data.courses.map((course) => (
+                                <Card key={course._id} className="bg-white/5 border-white/10 group overflow-hidden hover:border-white/20 transition-all">
+                                    <div className="aspect-video bg-white/5 relative">
+                                        {course.thumbnail && (
+                                            <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                                        )}
+                                        <Badge className={`absolute top-3 right-3 ${course.isPublished ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-muted-foreground'} border-none`}>
+                                            {course.isPublished ? t('teacherDashboard.courses.published') : t('teacherDashboard.courses.draft')}
+                                        </Badge>
                                     </div>
-                                    <Link href={`/teacher/courses/${course._id}`} className="hover:text-foreground underline">Edit Content</Link>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+                                    <CardHeader>
+                                        <CardTitle className="text-lg italic">{course.title}</CardTitle>
+                                        <CardDescription className="line-clamp-2 text-muted-foreground">{course.description}</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="flex justify-between items-center text-xs text-muted-foreground border-t border-white/5 pt-4">
+                                        <div className="flex items-center gap-1">
+                                            <Users className="h-3 w-3" />
+                                            <span>{t('teacherDashboard.courses.students', { count: course.studentCount ?? 0 })}</span>
+                                        </div>
+                                        <Link href={`/teacher/courses/${course._id}`} className="hover:text-foreground underline">{t('teacherDashboard.courses.editContent')}</Link>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
                 </TabsContent>
 
                 {/* Assignments Tab */}
                 <TabsContent value="assignments">
                     <Card className="bg-white/5 border-white/10">
                         <CardHeader>
-                            <CardTitle>Course Assignments</CardTitle>
-                            <CardDescription>Overview of all active tasks across your courses.</CardDescription>
+                            <CardTitle>{t('teacherDashboard.assignments.title')}</CardTitle>
+                            <CardDescription>{t('teacherDashboard.assignments.subtitle')}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Table>
                                 <TableHeader>
                                     <TableRow className="border-white/10 hover:bg-transparent">
-                                        <TableHead className="text-muted-foreground">Title</TableHead>
-                                        <TableHead className="text-muted-foreground">Course</TableHead>
-                                        <TableHead className="text-muted-foreground">Due Date</TableHead>
-                                        <TableHead className="text-muted-foreground text-right">Action</TableHead>
+                                        <TableHead className="text-muted-foreground">{t('teacherDashboard.assignments.titleColumn')}</TableHead>
+                                        <TableHead className="text-muted-foreground">{t('teacherDashboard.assignments.course')}</TableHead>
+                                        <TableHead className="text-muted-foreground">{t('teacherDashboard.assignments.dueDate')}</TableHead>
+                                        <TableHead className="text-muted-foreground text-right">{t('teacherDashboard.assignments.action')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -272,13 +282,20 @@ export default function TeacherDashboard() {
                                             <TableCell className="font-medium">{assignment.title}</TableCell>
                                             <TableCell className="italic text-muted-foreground">{assignment.courseId.title}</TableCell>
                                             <TableCell className="text-muted-foreground">
-                                                {new Date(assignment.dueDate).toLocaleDateString()}
+                                                {new Date(assignment.dueDate).toLocaleDateString(language === 'uz' ? 'uz-UZ' : 'en-US')}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Link href={`/teacher/assignments/${assignment._id}`} className="text-xs hover:text-foreground underline">Manage</Link>
+                                                <Link href={`/teacher/assignments/${assignment._id}`} className="text-xs hover:text-foreground underline">{t('teacherDashboard.assignments.manage')}</Link>
                                             </TableCell>
                                         </TableRow>
                                     ))}
+                                    {data.assignments.length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
+                                                {t('teacherDashboard.assignments.empty')}
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
                                 </TableBody>
                             </Table>
                         </CardContent>
