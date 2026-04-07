@@ -10,6 +10,8 @@ import {
     getErrorMessage,
     getErrorStatus,
 } from '@/lib/access-control';
+import { getDevFallbackCourseById } from '@/lib/dev-course-fallback';
+import { isDatabaseConnectionError } from '@/lib/db-errors';
 
 /**
  * @route GET /api/courses/[id]
@@ -20,16 +22,25 @@ export const GET = async (
     req: Request,
     context: { params: { id?: string } | Promise<{ id?: string }> }
 ) => {
+    const params = await context.params;
+    const courseId = params?.id;
+
+    if (!courseId) {
+        return NextResponse.json({ message: 'Course id is required' }, { status: 400 });
+    }
+
     try {
-        const params = await context.params;
-        const courseId = params?.id;
-        if (!courseId) {
-            return NextResponse.json({ message: 'Course id is required' }, { status: 400 });
-        }
         const user = getOptionalUser(req);
         const course = await assertCourseReadAccess(user, courseId);
         return NextResponse.json(course);
     } catch (error: unknown) {
+        if (process.env.NODE_ENV === 'development' && isDatabaseConnectionError(error)) {
+            const fallbackCourse = getDevFallbackCourseById(courseId);
+            if (fallbackCourse) {
+                return NextResponse.json(fallbackCourse);
+            }
+        }
+
         return NextResponse.json({ message: getErrorMessage(error) }, { status: getErrorStatus(error) });
     }
 };

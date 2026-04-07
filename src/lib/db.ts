@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import '@/models';
+import { toDatabaseConnectionError } from '@/lib/db-errors';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -7,16 +8,21 @@ if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
 }
 
+type MongooseCache = {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+};
+
 /**
  * Global is used here to maintain a cached connection across hot reloads
  * in development. This prevents connections growing exponentially
  * during API Route usage.
  */
-let cached = (global as any).mongoose;
+const globalWithMongoose = globalThis as typeof globalThis & {
+  mongoose: MongooseCache | undefined;
+};
 
-if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
-}
+const cached = globalWithMongoose.mongoose ?? (globalWithMongoose.mongoose = { conn: null, promise: null });
 
 async function dbConnect() {
   if (cached.conn) {
@@ -35,9 +41,9 @@ async function dbConnect() {
 
   try {
     cached.conn = await cached.promise;
-  } catch (e) {
+  } catch (error) {
     cached.promise = null;
-    throw e;
+    throw toDatabaseConnectionError(error);
   }
 
   return cached.conn;

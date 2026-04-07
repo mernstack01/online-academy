@@ -4,6 +4,8 @@ import { createCourse, getCourses } from '../../../services/course.service';
 import { UserRole } from '../../../types';
 import { verifyToken } from '../../../lib/auth-utils';
 import { AuthenticatedUser, getErrorMessage } from '@/lib/access-control';
+import { getDevFallbackCourses } from '@/lib/dev-course-fallback';
+import { isDatabaseConnectionError } from '@/lib/db-errors';
 
 /**
  * @route GET /api/courses
@@ -11,10 +13,11 @@ import { AuthenticatedUser, getErrorMessage } from '@/lib/access-control';
  * @access Public (returns published courses). Admin can include drafts via includeDrafts=true.
  */
 export const GET = async (req: Request) => {
+    const user = getOptionalUser(req);
+    const { searchParams } = new URL(req.url);
+    const includeDraftsParam = searchParams.get('includeDrafts') === 'true';
+
     try {
-        const user = getOptionalUser(req);
-        const { searchParams } = new URL(req.url);
-        const includeDraftsParam = searchParams.get('includeDrafts') === 'true';
         let query: Record<string, unknown> = { isPublished: true };
 
         if (includeDraftsParam && user?.role === UserRole.ADMIN) {
@@ -31,6 +34,10 @@ export const GET = async (req: Request) => {
         const courses = await getCourses(query);
         return NextResponse.json(courses);
     } catch (error: unknown) {
+        if (!includeDraftsParam && process.env.NODE_ENV === 'development' && isDatabaseConnectionError(error)) {
+            return NextResponse.json(getDevFallbackCourses());
+        }
+
         return NextResponse.json({ message: getErrorMessage(error) }, { status: 500 });
     }
 };
