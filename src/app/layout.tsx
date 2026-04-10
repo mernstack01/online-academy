@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ChatBot from "@/components/ChatBot";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -43,6 +44,7 @@ export default function RootLayout({
             </main>
             <Footer />
             <Toaster richColors />
+            <ChatBot />
           </AuthProvider>
         </LanguageProvider>
       </body>

@@ -17,7 +17,7 @@ export default function Footer() {
                   A
                 </div>
                 <span className="text-lg font-bold tracking-tight text-foreground">
-                  Online<span className="text-primary">Academy</span>
+                  Skynet<span className="text-primary">Academy</span>
                 </span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
@@ -62,7 +62,7 @@ export default function Footer() {
 
           <div className="mt-10 pt-6 border-t border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs text-muted-foreground">
             <span>
-              © {new Date().getFullYear()} OnlineAcademy. {t('footer.rights')}
+              © {new Date().getFullYear()} SkynetAcademy. {t('footer.rights')}
             </span>
             <span className="text-foreground/70">{t('footer.tagline')}</span>
           </div>

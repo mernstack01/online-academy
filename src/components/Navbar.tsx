@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/types';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -10,6 +11,7 @@ import { useI18n } from '@/context/LanguageContext';
 export default function Navbar() {
     const { t } = useI18n();
     const { user, logout } = useAuth();
+    const pathname = usePathname();
     const dashboardHref =
         user?.role === UserRole.ADMIN
             ? '/admin'
@@ -29,18 +31,24 @@ export default function Navbar() {
                                 A
                             </div>
                             <span className="text-xl font-bold tracking-tight text-foreground">
-                                Online<span className="text-primary">Academy</span>
+                                Skynet<span className="text-primary">Academy</span>
                             </span>
                         </Link>
                     </div>
 
                     <div className="hidden md:block">
                         <div className="ml-10 flex items-baseline space-x-4">
-                            <Link href="/courses" className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <Link
+                                href="/courses"
+                                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname === '/courses' ? 'text-foreground bg-white/10' : 'text-muted-foreground hover:text-foreground'}`}
+                            >
                                 {t('nav.courses')}
                             </Link>
                             {dashboardHref && (
-                                <Link href={dashboardHref} className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                                <Link
+                                    href={dashboardHref}
+                                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname.startsWith(dashboardHref) ? 'text-foreground bg-white/10' : 'text-muted-foreground hover:text-foreground'}`}
+                                >
                                     {t('nav.dashboard')}
                                 </Link>
                             )}

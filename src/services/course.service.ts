@@ -58,6 +58,18 @@ export const updateModule = async (courseId: string, moduleId: string, data: Par
     return module;
 };
 
+export const deleteModule = async (courseId: string, moduleId: string) => {
+    await dbConnect();
+    const course = await Course.findById(courseId);
+    if (!course) throw new Error('Course not found');
+
+    const module = (course.modules as any).id(moduleId);
+    if (!module) throw new Error('Module not found');
+
+    module.deleteOne();
+    await course.save();
+};
+
 /**
  * Lesson Services (Embedded)
  */
@@ -89,6 +101,21 @@ export const updateLesson = async (courseId: string, moduleId: string, lessonId:
     Object.assign(lesson, data);
     await course.save();
     return lesson;
+};
+
+export const deleteLesson = async (courseId: string, moduleId: string, lessonId: string) => {
+    await dbConnect();
+    const course = await Course.findById(courseId);
+    if (!course) throw new Error('Course not found');
+
+    const module = (course.modules as any).id(moduleId);
+    if (!module) throw new Error('Module not found');
+
+    const lesson = module.lessons.id(lessonId);
+    if (!lesson) throw new Error('Lesson not found');
+
+    lesson.deleteOne();
+    await course.save();
 };
 
 /**

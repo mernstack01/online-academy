@@ -17,7 +17,11 @@ import {
     BookOpen,
     ListChecks,
     PlayCircle,
-    CalendarDays
+    CalendarDays,
+    Trash2,
+    Pencil,
+    Check,
+    X
 } from 'lucide-react';
 
 type JsonResult<T> = {
@@ -74,6 +78,11 @@ export default function TeacherCourseEditor() {
 
     const [lessonForms, setLessonForms] = useState<Record<string, LessonForm>>({});
     const [testForms, setTestForms] = useState<Record<string, TestForm>>({});
+
+    // Edit state: moduleId -> title being edited
+    const [editingModule, setEditingModule] = useState<Record<string, string>>({});
+    // Edit state: lessonId -> fields being edited
+    const [editingLesson, setEditingLesson] = useState<Record<string, { title: string; videoUrl: string; description: string; content: string }>>({});
 
     const [assignmentForm, setAssignmentForm] = useState({
         title: '',
@@ -464,6 +473,89 @@ export default function TeacherCourseEditor() {
         }
     };
 
+    const handleDeleteModule = async (moduleId: string) => {
+        if (!confirm(t('teacherCourseEditor.alerts.confirmDeleteModule'))) return;
+        try {
+            const res = await fetch(`/api/modules/${moduleId}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders(),
+            });
+            if (res.ok) {
+                await refreshCourse();
+            } else {
+                const data = await res.json();
+                alert(data.message || t('teacherCourseEditor.alerts.failedDeleteModule'));
+            }
+        } catch (error) {
+            console.error('Delete module failed:', error);
+        }
+    };
+
+    const handleSaveModuleTitle = async (moduleId: string) => {
+        const newTitle = editingModule[moduleId];
+        if (!newTitle?.trim()) return;
+        try {
+            const res = await fetch(`/api/modules/${moduleId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                body: JSON.stringify({ title: newTitle.trim() }),
+            });
+            if (res.ok) {
+                setEditingModule((prev) => { const next = { ...prev }; delete next[moduleId]; return next; });
+                await refreshCourse();
+            } else {
+                const data = await res.json();
+                alert(data.message || t('teacherCourseEditor.alerts.failedUpdateModule'));
+            }
+        } catch (error) {
+            console.error('Update module failed:', error);
+        }
+    };
+
+    const handleDeleteLesson = async (moduleId: string, lessonId: string) => {
+        if (!confirm(t('teacherCourseEditor.alerts.confirmDeleteLesson'))) return;
+        try {
+            const res = await fetch(`/api/modules/${moduleId}/lessons/${lessonId}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders(),
+            });
+            if (res.ok) {
+                await refreshCourse();
+            } else {
+                const data = await res.json();
+                alert(data.message || t('teacherCourseEditor.alerts.failedDeleteLesson'));
+            }
+        } catch (error) {
+            console.error('Delete lesson failed:', error);
+        }
+    };
+
+    const handleSaveLesson = async (moduleId: string, lessonId: string) => {
+        const fields = editingLesson[lessonId];
+        if (!fields?.title?.trim()) return;
+        try {
+            const res = await fetch(`/api/modules/${moduleId}/lessons/${lessonId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                body: JSON.stringify({
+                    title: fields.title.trim(),
+                    videoUrl: fields.videoUrl,
+                    description: fields.description,
+                    content: fields.content,
+                }),
+            });
+            if (res.ok) {
+                setEditingLesson((prev) => { const next = { ...prev }; delete next[lessonId]; return next; });
+                await refreshCourse();
+            } else {
+                const data = await res.json();
+                alert(data.message || t('teacherCourseEditor.alerts.failedUpdateLesson'));
+            }
+        } catch (error) {
+            console.error('Update lesson failed:', error);
+        }
+    };
+
     if (loading || authLoading) {
         return (
             <div className="min-h-screen bg-background text-foreground p-8 flex items-center justify-center">
@@ -633,11 +725,38 @@ export default function TeacherCourseEditor() {
                                     const testForm = testForms[module._id] || { title: '', questions: [] };
                                     return (
                                         <div key={module._id} className="border border-white/10 rounded-2xl overflow-hidden">
-                                            <div className="px-4 py-3 bg-white/[0.03] flex items-center justify-between">
-                                                <div className="font-semibold">{module.title}</div>
-                                                <Badge variant="outline" className="border-white/10 text-muted-foreground">
-                                                    {t('teacherCourseEditor.curriculum.lessonsCount', { count: module.lessons.length })}
-                                                </Badge>
+                                            <div className="px-4 py-3 bg-white/[0.03] flex items-center justify-between gap-3">
+                                                {editingModule[module._id] !== undefined ? (
+                                                    <div className="flex items-center gap-2 flex-1">
+                                                        <input
+                                                            value={editingModule[module._id]}
+                                                            onChange={(e) => setEditingModule((prev) => ({ ...prev, [module._id]: e.target.value }))}
+                                                            className="flex-1 bg-card border border-primary/50 rounded-lg py-1.5 px-3 text-sm focus:outline-none text-foreground"
+                                                            autoFocus
+                                                        />
+                                                        <button type="button" onClick={() => handleSaveModuleTitle(module._id)} className="text-green-400 hover:text-green-300">
+                                                            <Check className="h-4 w-4" />
+                                                        </button>
+                                                        <button type="button" onClick={() => setEditingModule((prev) => { const n = { ...prev }; delete n[module._id]; return n; })} className="text-muted-foreground hover:text-foreground">
+                                                            <X className="h-4 w-4" />
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                        <span className="font-semibold truncate">{module.title}</span>
+                                                        <button type="button" onClick={() => setEditingModule((prev) => ({ ...prev, [module._id]: module.title }))} className="text-muted-foreground hover:text-foreground shrink-0">
+                                                            <Pencil className="h-3.5 w-3.5" />
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                <div className="flex items-center gap-2 shrink-0">
+                                                    <Badge variant="outline" className="border-white/10 text-muted-foreground">
+                                                        {t('teacherCourseEditor.curriculum.lessonsCount', { count: module.lessons.length })}
+                                                    </Badge>
+                                                    <button type="button" onClick={() => handleDeleteModule(module._id)} className="text-red-400 hover:text-red-300">
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div className="p-4 space-y-6">
                                                 <div className="space-y-3">
@@ -645,9 +764,83 @@ export default function TeacherCourseEditor() {
                                                         <div className="text-xs text-muted-foreground italic">{t('teacherCourseEditor.curriculum.noLessons')}</div>
                                                     )}
                                                     {module.lessons.sort((a, b) => a.order - b.order).map((lesson) => (
-                                                        <div key={lesson._id} className="flex items-center gap-3 text-sm text-muted-foreground">
-                                                            <PlayCircle className="h-4 w-4 text-primary/70" />
-                                                            <span>{lesson.title}</span>
+                                                        <div key={lesson._id} className="border border-white/5 rounded-xl overflow-hidden">
+                                                            {/* Lesson header row */}
+                                                            <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground bg-white/[0.02]">
+                                                                <PlayCircle className="h-4 w-4 text-primary/70 shrink-0" />
+                                                                <span className="flex-1 truncate">{lesson.title}</span>
+                                                                {editingLesson[lesson._id] === undefined && (
+                                                                    <div className="flex items-center gap-1.5 shrink-0">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setEditingLesson((prev) => ({
+                                                                                ...prev,
+                                                                                [lesson._id]: {
+                                                                                    title: lesson.title,
+                                                                                    videoUrl: lesson.videoUrl || '',
+                                                                                    description: lesson.description || '',
+                                                                                    content: lesson.content || '',
+                                                                                },
+                                                                            }))}
+                                                                            className="text-muted-foreground hover:text-foreground"
+                                                                        >
+                                                                            <Pencil className="h-3.5 w-3.5" />
+                                                                        </button>
+                                                                        <button type="button" onClick={() => handleDeleteLesson(module._id, lesson._id)} className="text-red-400 hover:text-red-300">
+                                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Expanded edit form */}
+                                                            {editingLesson[lesson._id] !== undefined && (
+                                                                <div className="px-3 pb-3 pt-2 space-y-2 bg-white/[0.02]">
+                                                                    <input
+                                                                        value={editingLesson[lesson._id].title}
+                                                                        onChange={(e) => setEditingLesson((prev) => ({ ...prev, [lesson._id]: { ...prev[lesson._id], title: e.target.value } }))}
+                                                                        placeholder={t('teacherCourseEditor.curriculum.lessonTitle')}
+                                                                        className="w-full bg-card border border-primary/50 rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground placeholder-muted-foreground"
+                                                                        autoFocus
+                                                                    />
+                                                                    <input
+                                                                        value={editingLesson[lesson._id].videoUrl}
+                                                                        onChange={(e) => setEditingLesson((prev) => ({ ...prev, [lesson._id]: { ...prev[lesson._id], videoUrl: e.target.value } }))}
+                                                                        placeholder={t('teacherCourseEditor.curriculum.videoUrl')}
+                                                                        className="w-full bg-card border border-white/10 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-primary/50 text-foreground placeholder-muted-foreground"
+                                                                    />
+                                                                    <textarea
+                                                                        value={editingLesson[lesson._id].description}
+                                                                        onChange={(e) => setEditingLesson((prev) => ({ ...prev, [lesson._id]: { ...prev[lesson._id], description: e.target.value } }))}
+                                                                        placeholder={t('teacherCourseEditor.curriculum.lessonDescription')}
+                                                                        className="w-full bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 h-16 resize-none text-foreground placeholder-muted-foreground"
+                                                                    />
+                                                                    <textarea
+                                                                        value={editingLesson[lesson._id].content}
+                                                                        onChange={(e) => setEditingLesson((prev) => ({ ...prev, [lesson._id]: { ...prev[lesson._id], content: e.target.value } }))}
+                                                                        placeholder={t('teacherCourseEditor.curriculum.lessonContent')}
+                                                                        className="w-full bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 h-20 resize-none text-foreground placeholder-muted-foreground"
+                                                                    />
+                                                                    <div className="flex gap-2 pt-1">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleSaveLesson(module._id, lesson._id)}
+                                                                            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 text-xs font-semibold transition-colors"
+                                                                        >
+                                                                            <Check className="h-3.5 w-3.5" />
+                                                                            {t('teacherCourseEditor.actions.saveChanges')}
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setEditingLesson((prev) => { const n = { ...prev }; delete n[lesson._id]; return n; })}
+                                                                            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/5 text-muted-foreground hover:text-foreground text-xs font-semibold transition-colors"
+                                                                        >
+                                                                            <X className="h-3.5 w-3.5" />
+                                                                            {t('teacherCourseEditor.actions.cancel')}
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     ))}
                                                 </div>
