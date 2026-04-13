@@ -9,6 +9,7 @@ const INTEREST_KEYWORDS: Record<string, string[]> = {
   uiux: ['ui', 'ux', 'dizayn', 'design', 'figma', 'interface', 'user experience', 'prototype', 'wireframe'],
 };
 
+// Kurs tavsiyasi uchun GET
 export async function GET(req: NextRequest) {
   const interest = req.nextUrl.searchParams.get('interest') || '';
 
@@ -16,7 +17,6 @@ export async function GET(req: NextRequest) {
     await connectDB();
 
     const keywords = INTEREST_KEYWORDS[interest] || [];
-
     let courses;
 
     if (keywords.length > 0) {
@@ -33,7 +33,6 @@ export async function GET(req: NextRequest) {
         .lean();
     }
 
-    // Mos kurs topilmasa, oxirgi qo'shilgan kurslarni qaytarish
     if (!courses || courses.length === 0) {
       courses = await Course.find({ isPublished: true })
         .select('_id title description price')
@@ -52,5 +51,71 @@ export async function GET(req: NextRequest) {
     });
   } catch {
     return NextResponse.json({ courses: [] }, { status: 500 });
+  }
+}
+
+// Gemini AI bilan erkin suhbat uchun POST
+export async function POST(req: NextRequest) {
+  try {
+    const { message, lang } = await req.json();
+    const language: string = lang === 'en' ? 'en' : 'uz';
+
+    if (!message || typeof message !== 'string') {
+      return NextResponse.json({ reply: language === 'en' ? 'Message cannot be empty.' : 'Xabar bo\'sh bo\'lishi mumkin emas.' }, { status: 400 });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ reply: 'AI xizmati hozircha mavjud emas.' }, { status: 500 });
+    }
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: language === 'en'
+                    ? `You are the AI assistant of "Skynet Academy" online learning platform.
+The platform offers courses in: Game Development, 3D Animation, AI & Computer Vision, UI/UX Design.
+Give short, clear and helpful answers in English.
+If the question is not related to the platform or education, politely redirect to the platform.
+
+User question: ${message}`
+                    : `Siz "Skynet Academy" online ta'lim platformasining AI yordamchisisiz.
+Platforma quyidagi yo'nalishlar bo'yicha kurslar taqdim etadi: Game Development, 3D Animatsiya, AI & Computer Vision, UI/UX Dizayn.
+Foydalanuvchilarga qisqa, aniq va foydali javoblar bering. O'zbek tilida javob bering.
+Agar savol platforma yoki ta'lim bilan bog'liq bo'lmasa, muloyimlik bilan platformaga yo'naltiring.
+
+Foydalanuvchi savoli: ${message}`,
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            maxOutputTokens: 300,
+            temperature: 0.7,
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      console.error('Gemini API xato:', response.status, JSON.stringify(errData));
+      return NextResponse.json({ reply: 'AI javob bera olmadi. Qayta urinib ko\'ring.' }, { status: 500 });
+    }
+
+    const data = await response.json();
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Javob olishda xatolik yuz berdi.';
+
+    return NextResponse.json({ reply });
+  } catch (err) {
+    console.error('POST /api/chatbot catch xatosi:', err);
+    return NextResponse.json({ reply: 'Xatolik yuz berdi. Qayta urinib ko\'ring.' }, { status: 500 });
   }
 }

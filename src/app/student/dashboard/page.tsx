@@ -164,7 +164,7 @@ export default function StudentDashboard() {
                                         </div>
                                         <Progress value={enrollment.status === 'completed' ? 100 : 25} className="h-1 bg-white/5" />
                                     </div>
-                                    <Link href={`/student/courses/${enrollment.courseId._id}`} className="mt-4 block text-center py-2 rounded-lg bg-white text-black font-semibold text-sm hover:bg-white/90 transition-all">
+                                    <Link href={`/student/courses/${enrollment.courseId._id}`} className="mt-4 block text-center py-2 rounded-lg bg-foreground text-background font-semibold text-sm hover:bg-foreground/90 transition-all">
                                         {t('studentDashboard.courses.continueLearning')}
                                     </Link>
                                 </CardContent>

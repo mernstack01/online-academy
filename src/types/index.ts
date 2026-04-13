@@ -26,8 +26,11 @@ export interface IResource {
 export interface ILesson {
     _id: string;
     title: string;
+    titleEn?: string;
     description?: string;
+    descriptionEn?: string;
     content?: string;
+    contentEn?: string;
     videoUrl?: string; // Vimeo or YouTube URL
     resources?: IResource[];
     order: number;
@@ -53,6 +56,7 @@ export interface ITest {
 export interface IModule {
     _id: string;
     title: string;
+    titleEn?: string;
     lessons: ILesson[];
     tests: ITest[];
     order: number;
@@ -63,7 +67,9 @@ export interface IModule {
 export interface ICourse {
     _id: string;
     title: string;
+    titleEn?: string;
     description: string;
+    descriptionEn?: string;
     thumbnail?: string;
     price: number;
     instructor: string | User; // User ID or populated User

@@ -20,7 +20,7 @@ export default function UnauthorizedPage() {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                     <Link
                         href="/"
-                        className="px-5 py-3 rounded-xl bg-white text-black font-semibold hover:bg-white/90 transition-all"
+                        className="px-5 py-3 rounded-xl bg-foreground text-background font-semibold hover:bg-foreground/90 transition-all"
                     >
                         Go Home
                     </Link>

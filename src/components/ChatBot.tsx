@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageCircle, X, Send, Bot, User, Sparkles } from 'lucide-react';
+import { useI18n } from '@/context/LanguageContext';
 
 type Message = {
   id: string;
@@ -52,33 +53,24 @@ function analyzeTestScore(score: number): string {
   return `🔴 Juda past natija. ${score}% — Xafa bo'lmang! Har kim qiynalishi mumkin. Darslarni qayta boshlang va o'qituvchingizdan yordam so'rang.`;
 }
 
-function handleFreeChat(text: string): string {
-  const lower = text.toLowerCase();
-  if (lower.includes('kurs') || lower.includes('o\'rganish')) {
-    return '📖 Kurslar haqida ko\'proq ma\'lumot olish uchun /courses sahifasiga o\'ting. Yoki men sizga mos kurs tavsiya qilishim mumkin!';
+async function askGemini(text: string, lang: string): Promise<string> {
+  try {
+    const res = await fetch('/api/chatbot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, lang }),
+    });
+    const data = await res.json();
+    return data.reply || (lang === 'en' ? '🤔 Failed to get a response.' : '🤔 Javob olishda xatolik yuz berdi.');
+  } catch {
+    return lang === 'en'
+      ? '❌ Network or server error. Please try again.'
+      : '❌ Internet yoki server xatoligi. Qayta urinib ko\'ring.';
   }
-  if (lower.includes('narx') || lower.includes('pul') || lower.includes('to\'lov')) {
-    return '💳 Narxlar haqida ma\'lumot olish uchun admin bilan bog\'laning. Ba\'zi kurslar bepul ham mavjud!';
-  }
-  if (lower.includes('sertifikat') || lower.includes('diplom')) {
-    return '🎓 Kursni tugatganingizdan so\'ng elektron sertifikat olishingiz mumkin. Bu sizning portfolio\'ingizni boyitadi!';
-  }
-  if (lower.includes('salom') || lower.includes('hi') || lower.includes('hello') || lower.includes('assalom')) {
-    return '👋 Salom! Sizga qanday yordam bera olaman?';
-  }
-  if (lower.includes('rahmat') || lower.includes('thank') || lower.includes('tashakkur')) {
-    return '😊 Iltimos! Yana savollaringiz bo\'lsa, bemalol so\'rang!';
-  }
-  if (lower.includes('o\'qituvchi') || lower.includes('teacher') || lower.includes('mentor')) {
-    return '👨‍🏫 Bizda tajribali o\'qituvchilar mavjud. Har bir kursda o\'qituvchi ma\'lumotlarini ko\'rishingiz mumkin.';
-  }
-  if (lower.includes('muammo') || lower.includes('xato') || lower.includes('ishlamay')) {
-    return '🛠️ Texnik muammo bo\'lsa, sahifani yangilab ko\'ring yoki admin bilan bog\'laning. Yordam berishga doim tayyormiz!';
-  }
-  return '🤔 Bu savolga aniq javob bera olmayman, lekin platformamiz bo\'yicha har qanday savolni so\'rashingiz mumkin! Kurs tavsiyasi yoki test tahlili uchun yuqoridagi menyudan foydalaning.';
 }
 
 export default function ChatBot() {
+  const { language } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -249,8 +241,10 @@ export default function ChatBot() {
       return;
     }
 
-    simulateTyping(() => {
-      addBotMessage(handleFreeChat(text));
+    setIsTyping(true);
+    askGemini(text, language).then(reply => {
+      setIsTyping(false);
+      addBotMessage(reply);
     });
   };
 

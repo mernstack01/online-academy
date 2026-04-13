@@ -13,6 +13,26 @@ import {
 import { getDevFallbackCourseById } from '@/lib/dev-course-fallback';
 import { isDatabaseConnectionError } from '@/lib/db-errors';
 
+function localizeCourse(course: any, lang: string) {
+    if (lang !== 'en') return course;
+    const c = course.toObject ? course.toObject() : { ...course };
+    return {
+        ...c,
+        title: c.titleEn || c.title,
+        description: c.descriptionEn || c.description,
+        modules: c.modules?.map((m: any) => ({
+            ...m,
+            title: m.titleEn || m.title,
+            lessons: m.lessons?.map((l: any) => ({
+                ...l,
+                title: l.titleEn || l.title,
+                description: l.descriptionEn || l.description,
+                content: l.contentEn || l.content,
+            })),
+        })),
+    };
+}
+
 /**
  * @route GET /api/courses/[id]
  * @desc Get course details with modules and lessons
@@ -30,9 +50,11 @@ export const GET = async (
     }
 
     try {
+        const { searchParams } = new URL(req.url);
+        const lang = searchParams.get('lang') || 'uz';
         const user = getOptionalUser(req);
         const course = await assertCourseReadAccess(user, courseId);
-        return NextResponse.json(course);
+        return NextResponse.json(localizeCourse(course, lang));
     } catch (error: unknown) {
         if (process.env.NODE_ENV === 'development' && isDatabaseConnectionError(error)) {
             const fallbackCourse = getDevFallbackCourseById(courseId);

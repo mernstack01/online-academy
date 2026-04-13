@@ -298,7 +298,7 @@ export default function AdminDashboard() {
                     <p className="text-muted-foreground">{t('adminDashboard.subtitle')}</p>
                 </div>
                 <div className="flex gap-3">
-                    <Link href="/teacher/dashboard" className="px-4 py-2 rounded-lg bg-white text-black text-sm font-semibold hover:bg-white/90 transition-all">
+                    <Link href="/teacher/dashboard" className="px-4 py-2 rounded-lg bg-foreground text-background text-sm font-semibold hover:bg-foreground/90 transition-all">
                         {t('adminDashboard.links.teacherView')}
                     </Link>
                     <Link href="/courses" className="px-4 py-2 rounded-lg bg-white/10 text-foreground text-sm font-semibold hover:bg-white/20 transition-all border border-white/10">
@@ -355,7 +355,7 @@ export default function AdminDashboard() {
                     <CardDescription>{t('adminDashboard.quickActions.description')}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col md:flex-row gap-4">
-                    <Link href="/teacher/courses/new" className="flex-1 px-4 py-3 rounded-xl bg-white text-black font-semibold text-center hover:bg-white/90 transition-all">
+                    <Link href="/teacher/courses/new" className="flex-1 px-4 py-3 rounded-xl bg-foreground text-background font-semibold text-center hover:bg-foreground/90 transition-all">
                         {t('adminDashboard.quickActions.createCourse')}
                     </Link>
                     <Link href="/admin/users" className="flex-1 px-4 py-3 rounded-xl bg-white/10 text-foreground font-semibold text-center hover:bg-white/20 transition-all border border-white/10">

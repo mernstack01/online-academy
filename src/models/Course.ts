@@ -26,10 +26,20 @@ const lessonSchema = new Schema({
         required: [true, 'Lesson title is required'],
         trim: true,
     },
+    titleEn: {
+        type: String,
+        trim: true,
+    },
     description: {
         type: String,
     },
+    descriptionEn: {
+        type: String,
+    },
     content: {
+        type: String,
+    },
+    contentEn: {
         type: String,
     },
     videoUrl: {
@@ -77,6 +87,10 @@ const moduleSchema = new Schema({
         required: [true, 'Module title is required'],
         trim: true,
     },
+    titleEn: {
+        type: String,
+        trim: true,
+    },
     lessons: [lessonSchema],
     tests: [testSchema],
     order: {
@@ -93,9 +107,16 @@ const courseSchema = new Schema<ICourseDocument>(
             required: [true, 'Course title is required'],
             trim: true,
         },
+        titleEn: {
+            type: String,
+            trim: true,
+        },
         description: {
             type: String,
             required: [true, 'Course description is required'],
+        },
+        descriptionEn: {
+            type: String,
         },
         thumbnail: {
             type: String,

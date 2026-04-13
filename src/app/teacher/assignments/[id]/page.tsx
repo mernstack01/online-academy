@@ -219,7 +219,7 @@ export default function TeacherAssignmentDetail() {
                                     type="button"
                                     onClick={() => handleGrade(submission._id)}
                                     disabled={gradingId === submission._id || !drafts[submission._id]?.grade}
-                                    className="h-10 bg-white text-black font-semibold hover:bg-white/90 transition-all"
+                                    className="h-10 bg-foreground text-background font-semibold hover:bg-foreground/90 transition-all"
                                 >
                                     <Send className="h-4 w-4 mr-2" />
                                     {gradingId === submission._id ? 'Grading...' : 'Submit Grade'}

@@ -47,7 +47,9 @@ export default function TeacherCourseEditor() {
 
     const [courseForm, setCourseForm] = useState({
         title: '',
+        titleEn: '',
         description: '',
+        descriptionEn: '',
         price: '',
         thumbnail: '',
         isPublished: false,
@@ -55,14 +57,18 @@ export default function TeacherCourseEditor() {
 
     const [moduleForm, setModuleForm] = useState({
         title: '',
+        titleEn: '',
         order: 1,
     });
 
     type LessonForm = {
         title: string;
+        titleEn: string;
         description: string;
+        descriptionEn: string;
         videoUrl: string;
         content: string;
+        contentEn: string;
     };
 
     type TestQuestionForm = {
@@ -79,10 +85,10 @@ export default function TeacherCourseEditor() {
     const [lessonForms, setLessonForms] = useState<Record<string, LessonForm>>({});
     const [testForms, setTestForms] = useState<Record<string, TestForm>>({});
 
-    // Edit state: moduleId -> title being edited
-    const [editingModule, setEditingModule] = useState<Record<string, string>>({});
+    // Edit state: moduleId -> {title, titleEn} being edited
+    const [editingModule, setEditingModule] = useState<Record<string, { title: string; titleEn: string }>>({});
     // Edit state: lessonId -> fields being edited
-    const [editingLesson, setEditingLesson] = useState<Record<string, { title: string; videoUrl: string; description: string; content: string }>>({});
+    const [editingLesson, setEditingLesson] = useState<Record<string, { title: string; titleEn: string; videoUrl: string; description: string; descriptionEn: string; content: string; contentEn: string }>>({});
 
     const [assignmentForm, setAssignmentForm] = useState({
         title: '',
@@ -157,7 +163,9 @@ export default function TeacherCourseEditor() {
                     setCourse(data);
                     setCourseForm({
                         title: data.title || '',
+                        titleEn: (data as any).titleEn || '',
                         description: data.description || '',
+                        descriptionEn: (data as any).descriptionEn || '',
                         price: String(data.price ?? ''),
                         thumbnail: data.thumbnail || '',
                         isPublished: !!data.isPublished,
@@ -208,7 +216,9 @@ export default function TeacherCourseEditor() {
             setCourse(data);
             setCourseForm({
                 title: data.title || '',
+                titleEn: data.titleEn || '',
                 description: data.description || '',
+                descriptionEn: data.descriptionEn || '',
                 price: String(data.price ?? ''),
                 thumbnail: data.thumbnail || '',
                 isPublished: !!data.isPublished,
@@ -271,12 +281,13 @@ export default function TeacherCourseEditor() {
                 headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
                 body: JSON.stringify({
                     title: moduleForm.title,
+                    titleEn: moduleForm.titleEn,
                     order: Number(moduleForm.order),
                 }),
             });
 
             if (res.ok) {
-                setModuleForm({ title: '', order: moduleForm.order + 1 });
+                setModuleForm({ title: '', titleEn: '', order: moduleForm.order + 1 });
                 await refreshCourse();
             } else {
                 const data = await res.json();
@@ -293,9 +304,12 @@ export default function TeacherCourseEditor() {
         setLessonForms((prev) => {
             const current = prev[moduleId] ?? {
                 title: '',
+                titleEn: '',
                 description: '',
+                descriptionEn: '',
                 videoUrl: '',
                 content: '',
+                contentEn: '',
             };
             return {
                 ...prev,
@@ -319,9 +333,12 @@ export default function TeacherCourseEditor() {
                 headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
                 body: JSON.stringify({
                     title: form.title,
+                    titleEn: form.titleEn,
                     description: form.description,
+                    descriptionEn: form.descriptionEn,
                     videoUrl: form.videoUrl,
                     content: form.content,
+                    contentEn: form.contentEn,
                     order: nextOrder,
                 }),
             });
@@ -329,9 +346,12 @@ export default function TeacherCourseEditor() {
             if (res.ok) {
                 handleLessonChange(moduleId, {
                     title: '',
+                    titleEn: '',
                     description: '',
+                    descriptionEn: '',
                     videoUrl: '',
                     content: '',
+                    contentEn: '',
                 });
                 await refreshCourse();
             } else {
@@ -492,13 +512,13 @@ export default function TeacherCourseEditor() {
     };
 
     const handleSaveModuleTitle = async (moduleId: string) => {
-        const newTitle = editingModule[moduleId];
-        if (!newTitle?.trim()) return;
+        const data = editingModule[moduleId];
+        if (!data?.title?.trim()) return;
         try {
             const res = await fetch(`/api/modules/${moduleId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-                body: JSON.stringify({ title: newTitle.trim() }),
+                body: JSON.stringify({ title: data.title.trim(), titleEn: data.titleEn.trim() }),
             });
             if (res.ok) {
                 setEditingModule((prev) => { const next = { ...prev }; delete next[moduleId]; return next; });
@@ -539,9 +559,12 @@ export default function TeacherCourseEditor() {
                 headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
                 body: JSON.stringify({
                     title: fields.title.trim(),
+                    titleEn: fields.titleEn.trim(),
                     videoUrl: fields.videoUrl,
                     description: fields.description,
+                    descriptionEn: fields.descriptionEn,
                     content: fields.content,
+                    contentEn: fields.contentEn,
                 }),
             });
             if (res.ok) {
@@ -609,7 +632,7 @@ export default function TeacherCourseEditor() {
                             type="button"
                             onClick={() => handlePublishToggle(true)}
                             disabled={savingCourse}
-                            className="bg-green-500 hover:bg-green-600 text-black font-semibold"
+                            className="bg-green-500 hover:bg-green-600 text-white font-semibold"
                         >
                             {t('teacherCourseEditor.actions.publishNow')}
                         </Button>
@@ -626,7 +649,7 @@ export default function TeacherCourseEditor() {
                     <CardContent>
                         <form onSubmit={handleCourseSave} className="space-y-4">
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('teacherCourseEditor.basics.titleLabel')}</label>
+                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('teacherCourseEditor.basics.titleLabel')} 🇺🇿</label>
                                 <input
                                     value={courseForm.title}
                                     onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
@@ -635,12 +658,30 @@ export default function TeacherCourseEditor() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('teacherCourseEditor.basics.descriptionLabel')}</label>
+                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('teacherCourseEditor.basics.titleLabel')} 🇬🇧</label>
+                                <input
+                                    value={courseForm.titleEn}
+                                    onChange={(e) => setCourseForm({ ...courseForm, titleEn: e.target.value })}
+                                    placeholder="Title in English"
+                                    className="w-full bg-card border border-white/10 rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground placeholder-muted-foreground"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('teacherCourseEditor.basics.descriptionLabel')} 🇺🇿</label>
                                 <textarea
                                     value={courseForm.description}
                                     onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
-                                    className="w-full bg-card border border-white/10 rounded-lg p-4 text-sm focus:outline-none focus:border-primary/50 transition-all h-28 resize-none text-foreground placeholder-muted-foreground"
+                                    className="w-full bg-card border border-white/10 rounded-lg p-4 text-sm focus:outline-none focus:border-primary/50 transition-all h-24 resize-none text-foreground placeholder-muted-foreground"
                                     required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('teacherCourseEditor.basics.descriptionLabel')} 🇬🇧</label>
+                                <textarea
+                                    value={courseForm.descriptionEn}
+                                    onChange={(e) => setCourseForm({ ...courseForm, descriptionEn: e.target.value })}
+                                    placeholder="Description in English"
+                                    className="w-full bg-card border border-white/10 rounded-lg p-4 text-sm focus:outline-none focus:border-primary/50 transition-all h-24 resize-none text-foreground placeholder-muted-foreground"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-3">
@@ -678,7 +719,7 @@ export default function TeacherCourseEditor() {
                             <Button
                                 type="submit"
                                 disabled={savingCourse}
-                                className="w-full h-12 bg-white hover:bg-white/90 text-black font-black text-lg skew-x-[-12deg] transition-all disabled:opacity-50"
+                                className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-black text-lg skew-x-[-12deg] transition-all disabled:opacity-50"
                             >
                                 <span className="skew-x-[12deg] flex items-center justify-center gap-2">
                                     <Save className="h-5 w-5" />
@@ -703,14 +744,20 @@ export default function TeacherCourseEditor() {
                                 <input
                                     value={moduleForm.title}
                                     onChange={(e) => setModuleForm({ ...moduleForm, title: e.target.value })}
-                                    placeholder={t('teacherCourseEditor.curriculum.newModuleTitle')}
+                                    placeholder={`${t('teacherCourseEditor.curriculum.newModuleTitle')} 🇺🇿`}
                                     className="md:col-span-2 bg-card border border-white/10 rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground placeholder-muted-foreground"
                                     required
+                                />
+                                <input
+                                    value={moduleForm.titleEn}
+                                    onChange={(e) => setModuleForm({ ...moduleForm, titleEn: e.target.value })}
+                                    placeholder="Module title in English 🇬🇧"
+                                    className="md:col-span-2 bg-card border border-white/10 rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground placeholder-muted-foreground"
                                 />
                                 <Button
                                     type="submit"
                                     disabled={creatingModule}
-                                    className="h-12 bg-white text-black font-semibold hover:bg-white/90 transition-all"
+                                    className="h-12 bg-foreground text-background font-semibold hover:bg-foreground/90 transition-all"
                                 >
                                     <Plus className="h-4 w-4 mr-2" />
                                     {creatingModule ? t('teacherCourseEditor.actions.addingModule') : t('teacherCourseEditor.actions.addModule')}
@@ -727,12 +774,19 @@ export default function TeacherCourseEditor() {
                                         <div key={module._id} className="border border-white/10 rounded-2xl overflow-hidden">
                                             <div className="px-4 py-3 bg-white/[0.03] flex items-center justify-between gap-3">
                                                 {editingModule[module._id] !== undefined ? (
-                                                    <div className="flex items-center gap-2 flex-1">
+                                                    <div className="flex items-center gap-2 flex-1 flex-wrap">
                                                         <input
-                                                            value={editingModule[module._id]}
-                                                            onChange={(e) => setEditingModule((prev) => ({ ...prev, [module._id]: e.target.value }))}
-                                                            className="flex-1 bg-card border border-primary/50 rounded-lg py-1.5 px-3 text-sm focus:outline-none text-foreground"
+                                                            value={editingModule[module._id].title}
+                                                            onChange={(e) => setEditingModule((prev) => ({ ...prev, [module._id]: { ...prev[module._id], title: e.target.value } }))}
+                                                            placeholder="UZ nomi"
+                                                            className="flex-1 min-w-[120px] bg-card border border-primary/50 rounded-lg py-1.5 px-3 text-sm focus:outline-none text-foreground"
                                                             autoFocus
+                                                        />
+                                                        <input
+                                                            value={editingModule[module._id].titleEn}
+                                                            onChange={(e) => setEditingModule((prev) => ({ ...prev, [module._id]: { ...prev[module._id], titleEn: e.target.value } }))}
+                                                            placeholder="EN title"
+                                                            className="flex-1 min-w-[120px] bg-card border border-white/10 rounded-lg py-1.5 px-3 text-sm focus:outline-none focus:border-primary/50 text-foreground"
                                                         />
                                                         <button type="button" onClick={() => handleSaveModuleTitle(module._id)} className="text-green-400 hover:text-green-300">
                                                             <Check className="h-4 w-4" />
@@ -744,7 +798,7 @@ export default function TeacherCourseEditor() {
                                                 ) : (
                                                     <div className="flex items-center gap-2 flex-1 min-w-0">
                                                         <span className="font-semibold truncate">{module.title}</span>
-                                                        <button type="button" onClick={() => setEditingModule((prev) => ({ ...prev, [module._id]: module.title }))} className="text-muted-foreground hover:text-foreground shrink-0">
+                                                        <button type="button" onClick={() => setEditingModule((prev) => ({ ...prev, [module._id]: { title: module.title, titleEn: (module as any).titleEn || '' } }))} className="text-muted-foreground hover:text-foreground shrink-0">
                                                             <Pencil className="h-3.5 w-3.5" />
                                                         </button>
                                                     </div>
@@ -777,9 +831,12 @@ export default function TeacherCourseEditor() {
                                                                                 ...prev,
                                                                                 [lesson._id]: {
                                                                                     title: lesson.title,
+                                                                                    titleEn: (lesson as any).titleEn || '',
                                                                                     videoUrl: lesson.videoUrl || '',
                                                                                     description: lesson.description || '',
+                                                                                    descriptionEn: (lesson as any).descriptionEn || '',
                                                                                     content: lesson.content || '',
+                                                                                    contentEn: (lesson as any).contentEn || '',
                                                                                 },
                                                                             }))}
                                                                             className="text-muted-foreground hover:text-foreground"
@@ -796,31 +853,55 @@ export default function TeacherCourseEditor() {
                                                             {/* Expanded edit form */}
                                                             {editingLesson[lesson._id] !== undefined && (
                                                                 <div className="px-3 pb-3 pt-2 space-y-2 bg-white/[0.02]">
-                                                                    <input
-                                                                        value={editingLesson[lesson._id].title}
-                                                                        onChange={(e) => setEditingLesson((prev) => ({ ...prev, [lesson._id]: { ...prev[lesson._id], title: e.target.value } }))}
-                                                                        placeholder={t('teacherCourseEditor.curriculum.lessonTitle')}
-                                                                        className="w-full bg-card border border-primary/50 rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground placeholder-muted-foreground"
-                                                                        autoFocus
-                                                                    />
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        <input
+                                                                            value={editingLesson[lesson._id].title}
+                                                                            onChange={(e) => setEditingLesson((prev) => ({ ...prev, [lesson._id]: { ...prev[lesson._id], title: e.target.value } }))}
+                                                                            placeholder={`${t('teacherCourseEditor.curriculum.lessonTitle')} 🇺🇿`}
+                                                                            className="bg-card border border-primary/50 rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground placeholder-muted-foreground"
+                                                                            autoFocus
+                                                                        />
+                                                                        <input
+                                                                            value={editingLesson[lesson._id].titleEn}
+                                                                            onChange={(e) => setEditingLesson((prev) => ({ ...prev, [lesson._id]: { ...prev[lesson._id], titleEn: e.target.value } }))}
+                                                                            placeholder="Lesson title EN 🇬🇧"
+                                                                            className="bg-card border border-white/10 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-primary/50 text-foreground placeholder-muted-foreground"
+                                                                        />
+                                                                    </div>
                                                                     <input
                                                                         value={editingLesson[lesson._id].videoUrl}
                                                                         onChange={(e) => setEditingLesson((prev) => ({ ...prev, [lesson._id]: { ...prev[lesson._id], videoUrl: e.target.value } }))}
                                                                         placeholder={t('teacherCourseEditor.curriculum.videoUrl')}
                                                                         className="w-full bg-card border border-white/10 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-primary/50 text-foreground placeholder-muted-foreground"
                                                                     />
-                                                                    <textarea
-                                                                        value={editingLesson[lesson._id].description}
-                                                                        onChange={(e) => setEditingLesson((prev) => ({ ...prev, [lesson._id]: { ...prev[lesson._id], description: e.target.value } }))}
-                                                                        placeholder={t('teacherCourseEditor.curriculum.lessonDescription')}
-                                                                        className="w-full bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 h-16 resize-none text-foreground placeholder-muted-foreground"
-                                                                    />
-                                                                    <textarea
-                                                                        value={editingLesson[lesson._id].content}
-                                                                        onChange={(e) => setEditingLesson((prev) => ({ ...prev, [lesson._id]: { ...prev[lesson._id], content: e.target.value } }))}
-                                                                        placeholder={t('teacherCourseEditor.curriculum.lessonContent')}
-                                                                        className="w-full bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 h-20 resize-none text-foreground placeholder-muted-foreground"
-                                                                    />
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        <textarea
+                                                                            value={editingLesson[lesson._id].description}
+                                                                            onChange={(e) => setEditingLesson((prev) => ({ ...prev, [lesson._id]: { ...prev[lesson._id], description: e.target.value } }))}
+                                                                            placeholder={`${t('teacherCourseEditor.curriculum.lessonDescription')} 🇺🇿`}
+                                                                            className="bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 h-16 resize-none text-foreground placeholder-muted-foreground"
+                                                                        />
+                                                                        <textarea
+                                                                            value={editingLesson[lesson._id].descriptionEn}
+                                                                            onChange={(e) => setEditingLesson((prev) => ({ ...prev, [lesson._id]: { ...prev[lesson._id], descriptionEn: e.target.value } }))}
+                                                                            placeholder="Description EN 🇬🇧"
+                                                                            className="bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 h-16 resize-none text-foreground placeholder-muted-foreground"
+                                                                        />
+                                                                    </div>
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        <textarea
+                                                                            value={editingLesson[lesson._id].content}
+                                                                            onChange={(e) => setEditingLesson((prev) => ({ ...prev, [lesson._id]: { ...prev[lesson._id], content: e.target.value } }))}
+                                                                            placeholder={`${t('teacherCourseEditor.curriculum.lessonContent')} 🇺🇿`}
+                                                                            className="bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 h-20 resize-none text-foreground placeholder-muted-foreground"
+                                                                        />
+                                                                        <textarea
+                                                                            value={editingLesson[lesson._id].contentEn}
+                                                                            onChange={(e) => setEditingLesson((prev) => ({ ...prev, [lesson._id]: { ...prev[lesson._id], contentEn: e.target.value } }))}
+                                                                            placeholder="Content EN 🇬🇧"
+                                                                            className="bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 h-20 resize-none text-foreground placeholder-muted-foreground"
+                                                                        />
+                                                                    </div>
                                                                     <div className="flex gap-2 pt-1">
                                                                         <button
                                                                             type="button"
@@ -849,14 +930,20 @@ export default function TeacherCourseEditor() {
                                                     <input
                                                         value={lessonForms[module._id]?.title || ''}
                                                         onChange={(e) => handleLessonChange(module._id, { title: e.target.value })}
-                                                        placeholder={t('teacherCourseEditor.curriculum.lessonTitle')}
+                                                        placeholder={`${t('teacherCourseEditor.curriculum.lessonTitle')} 🇺🇿`}
+                                                        className="bg-card border border-white/10 rounded-lg py-2.5 px-3 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground placeholder-muted-foreground"
+                                                    />
+                                                    <input
+                                                        value={lessonForms[module._id]?.titleEn || ''}
+                                                        onChange={(e) => handleLessonChange(module._id, { titleEn: e.target.value })}
+                                                        placeholder="Lesson title EN 🇬🇧"
                                                         className="bg-card border border-white/10 rounded-lg py-2.5 px-3 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground placeholder-muted-foreground"
                                                     />
                                                     <input
                                                         value={lessonForms[module._id]?.videoUrl || ''}
                                                         onChange={(e) => handleLessonChange(module._id, { videoUrl: e.target.value })}
                                                         placeholder={t('teacherCourseEditor.curriculum.videoUrl')}
-                                                        className="bg-card border border-white/10 rounded-lg py-2.5 px-3 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground placeholder-muted-foreground"
+                                                        className="md:col-span-2 bg-card border border-white/10 rounded-lg py-2.5 px-3 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground placeholder-muted-foreground"
                                                     />
                                                     <p className="md:col-span-2 text-xs text-muted-foreground">
                                                         {t('teacherCourseEditor.curriculum.videoSupport')}
@@ -864,19 +951,31 @@ export default function TeacherCourseEditor() {
                                                     <textarea
                                                         value={lessonForms[module._id]?.description || ''}
                                                         onChange={(e) => handleLessonChange(module._id, { description: e.target.value })}
-                                                        placeholder={t('teacherCourseEditor.curriculum.lessonDescription')}
-                                                        className="md:col-span-2 bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 transition-all h-20 resize-none text-foreground placeholder-muted-foreground"
+                                                        placeholder={`${t('teacherCourseEditor.curriculum.lessonDescription')} 🇺🇿`}
+                                                        className="bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 transition-all h-20 resize-none text-foreground placeholder-muted-foreground"
+                                                    />
+                                                    <textarea
+                                                        value={lessonForms[module._id]?.descriptionEn || ''}
+                                                        onChange={(e) => handleLessonChange(module._id, { descriptionEn: e.target.value })}
+                                                        placeholder="Description EN 🇬🇧"
+                                                        className="bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 transition-all h-20 resize-none text-foreground placeholder-muted-foreground"
                                                     />
                                                     <textarea
                                                         value={lessonForms[module._id]?.content || ''}
                                                         onChange={(e) => handleLessonChange(module._id, { content: e.target.value })}
-                                                        placeholder={t('teacherCourseEditor.curriculum.lessonContent')}
-                                                        className="md:col-span-2 bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 transition-all h-24 resize-none text-foreground placeholder-muted-foreground"
+                                                        placeholder={`${t('teacherCourseEditor.curriculum.lessonContent')} 🇺🇿`}
+                                                        className="bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 transition-all h-24 resize-none text-foreground placeholder-muted-foreground"
+                                                    />
+                                                    <textarea
+                                                        value={lessonForms[module._id]?.contentEn || ''}
+                                                        onChange={(e) => handleLessonChange(module._id, { contentEn: e.target.value })}
+                                                        placeholder="Content EN 🇬🇧"
+                                                        className="bg-card border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:border-primary/50 transition-all h-24 resize-none text-foreground placeholder-muted-foreground"
                                                     />
                                                     <Button
                                                         type="button"
                                                         onClick={() => handleAddLesson(module._id)}
-                                                        className="md:col-span-2 h-11 bg-white text-black font-semibold hover:bg-white/90 transition-all"
+                                                        className="md:col-span-2 h-11 bg-foreground text-background font-semibold hover:bg-foreground/90 transition-all"
                                                     >
                                                         <Plus className="h-4 w-4 mr-2" />
                                                         {t('teacherCourseEditor.actions.addLesson')}
@@ -1067,7 +1166,7 @@ export default function TeacherCourseEditor() {
                                 <Button
                                     type="submit"
                                     disabled={creatingAssignment}
-                                    className="w-full h-11 bg-white text-black font-semibold hover:bg-white/90 transition-all"
+                                    className="w-full h-11 bg-foreground text-background font-semibold hover:bg-foreground/90 transition-all"
                                 >
                                     {creatingAssignment ? t('teacherCourseEditor.actions.creatingAssignment') : t('teacherCourseEditor.actions.createAssignment')}
                                 </Button>

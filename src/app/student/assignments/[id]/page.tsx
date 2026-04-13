@@ -236,7 +236,7 @@ export default function AssignmentSubmissionPage() {
                                         <Button
                                             type="submit"
                                             disabled={submitting || (isPastDue && !submission)}
-                                            className="w-full h-14 bg-white hover:bg-white/90 text-black font-black text-lg skew-x-[-12deg] transition-all disabled:opacity-50"
+                                            className="w-full h-14 bg-foreground hover:bg-foreground/90 text-background font-black text-lg skew-x-[-12deg] transition-all disabled:opacity-50"
                                         >
                                             <span className="skew-x-[12deg] flex items-center justify-center gap-2">
                                                 <Send className="h-5 w-5" />

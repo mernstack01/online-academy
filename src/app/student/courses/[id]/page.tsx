@@ -282,7 +282,7 @@ export default function StudentCourseView() {
                         <div className="flex flex-col md:flex-row gap-4 items-center">
                             <Button
                                 onClick={handleSubmitTest}
-                                className="bg-white text-black font-semibold hover:bg-white/90"
+                                className="bg-foreground text-background font-semibold hover:bg-foreground/90"
                             >
                                 {t('studentCourse.submitTest')}
                             </Button>

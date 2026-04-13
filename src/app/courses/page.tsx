@@ -7,7 +7,7 @@ import { ADMIN_TELEGRAM_URL } from '@/lib/constants';
 import { useI18n } from '@/context/LanguageContext';
 
 export default function CoursesPage() {
-    const { t } = useI18n();
+    const { t, language } = useI18n();
     const [courses, setCourses] = useState<ICourse[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -15,7 +15,7 @@ export default function CoursesPage() {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const res = await fetch('/api/courses');
+                const res = await fetch(`/api/courses?lang=${language}`);
                 const data = await res.json();
                 if (!res.ok) {
                     throw new Error(data.message || 'Failed to load courses');
@@ -32,7 +32,7 @@ export default function CoursesPage() {
         };
 
         fetchCourses();
-    }, []);
+    }, [language]);
 
     if (loading) {
         return (
@@ -116,7 +116,7 @@ export default function CoursesPage() {
                                         href={ADMIN_TELEGRAM_URL}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="mt-4 inline-flex items-center justify-center rounded-xl bg-white text-black text-xs font-bold px-4 py-3 uppercase tracking-wider hover:bg-white/90 transition-all"
+                                        className="mt-4 inline-flex items-center justify-center rounded-xl bg-foreground text-background text-xs font-bold px-4 py-3 uppercase tracking-wider hover:bg-foreground/90 transition-all"
                                     >
                                         {t('courses.contactAdmin')}
                                     </a>

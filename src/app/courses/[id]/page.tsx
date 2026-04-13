@@ -16,7 +16,7 @@ export default function CourseDetailPage() {
     const params = useParams();
     const router = useRouter();
     const { user, isAuthenticated, loading: authLoading } = useAuth();
-    const { t } = useI18n();
+    const { t, language } = useI18n();
     const [course, setCourse] = useState<ICourse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -29,7 +29,7 @@ export default function CourseDetailPage() {
         const fetchCourseData = async () => {
             try {
                 // Fetch course details
-                const courseRes = await fetch(`/api/courses/${courseId}`);
+                const courseRes = await fetch(`/api/courses/${courseId}?lang=${language}`);
                 const courseData = await courseRes.json();
                 if (courseRes.ok) {
                     setCourse(courseData);
@@ -58,7 +58,7 @@ export default function CourseDetailPage() {
         if (courseId) {
             fetchCourseData();
         }
-    }, [courseId, isAuthenticated, user, router, authLoading]);
+    }, [courseId, isAuthenticated, user, router, authLoading, language]);
 
     const handleEnroll = async () => {
         if ((course?.price ?? 0) > 0) {
@@ -110,7 +110,7 @@ export default function CourseDetailPage() {
                 <div className="glass p-10 rounded-3xl border border-white/10 text-center max-w-lg">
                     <h2 className="text-2xl font-black italic mb-3">{t('courseDetail.errors.unableToLoad')}</h2>
                     <p className="text-muted-foreground mb-6">{error}</p>
-                    <Link href="/courses" className="px-5 py-3 rounded-xl bg-white text-black font-semibold hover:bg-white/90 transition-all">
+                    <Link href="/courses" className="px-5 py-3 rounded-xl bg-foreground text-background font-semibold hover:bg-foreground/90 transition-all">
                         {t('courseDetail.actions.backToCourses')}
                     </Link>
                 </div>
@@ -235,7 +235,7 @@ export default function CourseDetailPage() {
                                         rel="noreferrer"
                                         className="block"
                                     >
-                                        <Button className="w-full h-14 bg-white hover:bg-white/90 text-black font-black text-lg skew-x-[-12deg] transition-all">
+                                        <Button className="w-full h-14 bg-foreground hover:bg-foreground/90 text-background font-black text-lg skew-x-[-12deg] transition-all">
                                             <span className="skew-x-[12deg] flex items-center gap-2 uppercase">
                                                 {t('courseDetail.actions.contactAdminToBuy')}
                                             </span>
@@ -245,7 +245,7 @@ export default function CourseDetailPage() {
                                     <Button
                                         onClick={handleEnroll}
                                         disabled={enrolling}
-                                        className="w-full h-14 bg-white hover:bg-white/90 text-black font-black text-lg skew-x-[-12deg] transition-all disabled:opacity-50"
+                                        className="w-full h-14 bg-foreground hover:bg-foreground/90 text-background font-black text-lg skew-x-[-12deg] transition-all disabled:opacity-50"
                                     >
                                         <span className="skew-x-[12deg] flex items-center gap-2 uppercase">
                                             {enrolling

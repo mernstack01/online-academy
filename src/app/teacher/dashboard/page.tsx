@@ -108,7 +108,7 @@ export default function TeacherDashboard() {
                     <p className="text-muted-foreground mt-2">{t('teacherDashboard.subtitle')}</p>
                 </div>
                 <div className="flex gap-3">
-                    <Link href="/teacher/courses/new" className="bg-white text-black px-4 py-2 rounded-lg font-semibold hover:bg-white/90 transition-all text-sm">
+                    <Link href="/teacher/courses/new" className="bg-foreground text-background px-4 py-2 rounded-lg font-semibold hover:bg-foreground/90 transition-all text-sm">
                         {t('teacherDashboard.actions.createCourse')}
                     </Link>
                     <button
@@ -202,7 +202,7 @@ export default function TeacherDashboard() {
                                                 {new Date(sub.createdAt).toLocaleDateString(language === 'uz' ? 'uz-UZ' : 'en-US')}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Link href={`/teacher/submissions/${sub._id}`} className="inline-flex items-center gap-1 text-xs bg-white text-black px-3 py-1.5 rounded-md font-medium hover:bg-white/90">
+                                                <Link href={`/teacher/submissions/${sub._id}`} className="inline-flex items-center gap-1 text-xs bg-foreground text-background px-3 py-1.5 rounded-md font-medium hover:bg-foreground/90">
                                                     {t('teacherDashboard.grading.gradeItem')}
                                                 </Link>
                                             </TableCell>

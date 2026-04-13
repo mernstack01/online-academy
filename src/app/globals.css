@@ -119,8 +119,9 @@ h4,
 }
 
 .glass-hover:hover {
-  background: rgba(30, 41, 59, 0.9);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--card);
+  border-color: var(--primary) !important;
+  box-shadow: 0 12px 40px rgba(124, 58, 237, 0.15);
   transform: translateY(-4px);
 }
 

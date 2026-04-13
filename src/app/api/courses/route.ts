@@ -7,6 +7,26 @@ import { AuthenticatedUser, getErrorMessage } from '@/lib/access-control';
 import { getDevFallbackCourses } from '@/lib/dev-course-fallback';
 import { isDatabaseConnectionError } from '@/lib/db-errors';
 
+function localizeCourse(course: any, lang: string) {
+    if (lang !== 'en') return course;
+    const c = course.toObject ? course.toObject() : { ...course };
+    return {
+        ...c,
+        title: c.titleEn || c.title,
+        description: c.descriptionEn || c.description,
+        modules: c.modules?.map((m: any) => ({
+            ...m,
+            title: m.titleEn || m.title,
+            lessons: m.lessons?.map((l: any) => ({
+                ...l,
+                title: l.titleEn || l.title,
+                description: l.descriptionEn || l.description,
+                content: l.contentEn || l.content,
+            })),
+        })),
+    };
+}
+
 /**
  * @route GET /api/courses
  * @desc Get all courses
@@ -16,6 +36,7 @@ export const GET = async (req: Request) => {
     const user = getOptionalUser(req);
     const { searchParams } = new URL(req.url);
     const includeDraftsParam = searchParams.get('includeDrafts') === 'true';
+    const lang = searchParams.get('lang') || 'uz';
 
     try {
         let query: Record<string, unknown> = { isPublished: true };
@@ -32,7 +53,7 @@ export const GET = async (req: Request) => {
         }
 
         const courses = await getCourses(query);
-        return NextResponse.json(courses);
+        return NextResponse.json(courses.map((c: any) => localizeCourse(c, lang)));
     } catch (error: unknown) {
         if (!includeDraftsParam && process.env.NODE_ENV === 'development' && isDatabaseConnectionError(error)) {
             return NextResponse.json(getDevFallbackCourses());

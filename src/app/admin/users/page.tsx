@@ -392,7 +392,7 @@ export default function AdminUsersPage() {
                     </Link>
                     <Link
                         href="/courses"
-                        className="px-4 py-2 rounded-lg bg-white text-black text-sm font-semibold hover:bg-white/90 transition-all"
+                        className="px-4 py-2 rounded-lg bg-foreground text-background text-sm font-semibold hover:bg-foreground/90 transition-all"
                     >
                         {t('adminUsers.links.browseCourses')}
                     </Link>

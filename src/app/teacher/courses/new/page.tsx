@@ -24,7 +24,9 @@ export default function CreateCoursePage() {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
+        titleEn: '',
         description: '',
+        descriptionEn: '',
         price: '',
         thumbnail: '',
     });
@@ -102,33 +104,62 @@ export default function CreateCoursePage() {
                     </CardHeader>
                     <CardContent className="pt-8">
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                                    <Type className="h-3 w-3" />
-                                    Course Title
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    placeholder="e.g. Master Class: Modern UI Design"
-                                    className="w-full bg-card border border-white/10 rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-primary/50 transition-all italic text-foreground placeholder-muted-foreground"
-                                    required
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                                        <Type className="h-3 w-3" />
+                                        Course Title 🇺🇿
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.title}
+                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                        placeholder="Kurs nomi (O'zbek)"
+                                        className="w-full bg-card border border-white/10 rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-primary/50 transition-all italic text-foreground placeholder-muted-foreground"
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                                        <Type className="h-3 w-3" />
+                                        Course Title 🇬🇧
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.titleEn}
+                                        onChange={(e) => setFormData({ ...formData, titleEn: e.target.value })}
+                                        placeholder="Course title (English)"
+                                        className="w-full bg-card border border-white/10 rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-primary/50 transition-all italic text-foreground placeholder-muted-foreground"
+                                    />
+                                </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                                    <AlignLeft className="h-3 w-3" />
-                                    Description
-                                </label>
-                                <textarea
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    placeholder="Tell your students what they will learn..."
-                                    className="w-full bg-card border border-white/10 rounded-lg p-4 text-sm focus:outline-none focus:border-primary/50 transition-all h-32 resize-none italic text-foreground placeholder-muted-foreground"
-                                    required
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                                        <AlignLeft className="h-3 w-3" />
+                                        Description 🇺🇿
+                                    </label>
+                                    <textarea
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                        placeholder="Kurs haqida (O'zbek)..."
+                                        className="w-full bg-card border border-white/10 rounded-lg p-4 text-sm focus:outline-none focus:border-primary/50 transition-all h-28 resize-none italic text-foreground placeholder-muted-foreground"
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                                        <AlignLeft className="h-3 w-3" />
+                                        Description 🇬🇧
+                                    </label>
+                                    <textarea
+                                        value={formData.descriptionEn}
+                                        onChange={(e) => setFormData({ ...formData, descriptionEn: e.target.value })}
+                                        placeholder="Course description (English)..."
+                                        className="w-full bg-card border border-white/10 rounded-lg p-4 text-sm focus:outline-none focus:border-primary/50 transition-all h-28 resize-none italic text-foreground placeholder-muted-foreground"
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -167,7 +198,7 @@ export default function CreateCoursePage() {
                                 <Button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full h-14 bg-white hover:bg-white/90 text-black font-black text-lg skew-x-[-12deg] transition-all disabled:opacity-50"
+                                    className="w-full h-14 bg-foreground hover:bg-foreground/90 text-background font-black text-lg skew-x-[-12deg] transition-all disabled:opacity-50"
                                 >
                                     <span className="skew-x-[12deg] flex items-center justify-center gap-2">
                                         <Save className="h-5 w-5" />
