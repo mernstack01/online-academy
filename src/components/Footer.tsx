@@ -50,7 +50,7 @@ export default function Footer() {
                 {t('footer.contactDesc')}
               </p>
               <a
-                href="https://t.me/homenecy"
+                href={process.env.NEXT_PUBLIC_ADMIN_TELEGRAM}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-primary text-white text-sm font-semibold shadow-lg shadow-primary/25 hover:bg-primary-hover transition-colors"
