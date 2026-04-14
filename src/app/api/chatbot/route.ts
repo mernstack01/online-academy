@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     }
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -107,7 +107,7 @@ Foydalanuvchi savoli: ${message}`,
     if (!response.ok) {
       const errData = await response.json().catch(() => ({}));
       console.error('Gemini API xato:', response.status, JSON.stringify(errData));
-      return NextResponse.json({ reply: 'AI javob bera olmadi. Qayta urinib ko\'ring.' }, { status: 500 });
+      return NextResponse.json({ reply: `Gemini xato: ${response.status} — ${JSON.stringify(errData)}` }, { status: 500 });
     }
 
     const data = await response.json();
