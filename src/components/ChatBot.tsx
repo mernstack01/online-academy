@@ -19,7 +19,108 @@ type Step =
   | 'recommend'
   | 'test_input'
   | 'test_result'
+  | 'diagnostic_quiz'
+  | 'diagnostic_result'
   | 'free_chat';
+
+type QuizCourse = 'photoshop' | 'illustrator' | 'uiux' | 'blender' | 'none';
+
+const QUIZ_QUESTIONS: { question: string; options: { label: string; course: QuizCourse }[] }[] = [
+  {
+    question: '1️⃣ Smartfoningizda olingan fotosuratni juda qattiq yaqinlashtirsangiz, u mayda kvadratchalardan iborat ekanini ko\'rasiz. Bu kvadratchalar nima deyiladi?',
+    options: [
+      { label: 'Nuqtalar', course: 'none' },
+      { label: 'Piksellar', course: 'photoshop' },
+      { label: 'Kataklar', course: 'none' },
+    ],
+  },
+  {
+    question: '2️⃣ Logotip yaratayotganda (masalan, Apple yoki Nike), tasvir kattalashganda sifati buzilmasligi kerak. Buning uchun qaysi grafika turidan foydalaniladi?',
+    options: [
+      { label: 'Rastrli (pikselli)', course: 'none' },
+      { label: 'Vektorli (chiziqli)', course: 'illustrator' },
+    ],
+  },
+  {
+    question: '3️⃣ Sizga chiroyli rasm tahrirlash (yuzdagi dog\'larni o\'chirish, ranglarni yorqinroq qilish) yoqadimi?',
+    options: [
+      { label: 'Ha, bu qiziq', course: 'photoshop' },
+      { label: 'Yo\'q, menga noldan rasm chizish yoqadi', course: 'none' },
+    ],
+  },
+  {
+    question: '4️⃣ Kompyuterda rasm chizish uchun qaysi qurilma ko\'proq yordam beradi deb o\'ylaysiz?',
+    options: [
+      { label: 'Oddiy sichqoncha', course: 'none' },
+      { label: 'Grafik planshet va qalam (stilus)', course: 'illustrator' },
+    ],
+  },
+  {
+    question: '5️⃣ Instagram uchun chiroyli post yoki reklama banneri yaratishda nima eng muhim?',
+    options: [
+      { label: 'Ranglar va matnning joylashuvi', course: 'uiux' },
+      { label: 'Rasmdagi odamlarning soni', course: 'none' },
+    ],
+  },
+  {
+    question: '6️⃣ Veb-saytlar yoki mobil ilovalar (masalan, Telegram) tugmalari qayerda joylashishini loyihalash sizga qiziqmi?',
+    options: [
+      { label: 'Ha, juda qiziq', course: 'uiux' },
+      { label: 'Yo\'q, menga tayyor rasmlar bilan ishlash yoqadi', course: 'none' },
+    ],
+  },
+  {
+    question: '7️⃣ Multfilmlardagi qahramonlarni har tomondan (oldindan, orqadan, yondan) ko\'rish mumkin bo\'lgan hajmli shaklda yaratish qaysi sohaga kiradi?',
+    options: [
+      { label: '2D grafika', course: 'none' },
+      { label: '3D grafika', course: 'blender' },
+    ],
+  },
+  {
+    question: '8️⃣ Ranglar haqida nima deb o\'ylaysiz: "Qizil" rang inson diqqatini tortadimi?',
+    options: [
+      { label: 'Ha, albatta', course: 'none' },
+      { label: 'Yo\'q, farqi yo\'q', course: 'blender' },
+    ],
+  },
+  {
+    question: '9️⃣ Sizga ko\'proq nima yoqadi: tayyor rasmlarni chiroyli qilishmi yoki noldan yangi dunyo yaratishmi?',
+    options: [
+      { label: 'Tayyorini tahrirlash', course: 'photoshop' },
+      { label: 'Yangi narsa yaratish', course: 'none' },
+    ],
+  },
+  {
+    question: '🔟 Kompyuter grafikasi bilan shug\'ullanish uchun rasm chizish qobiliyati (qog\'ozda) shartmi?',
+    options: [
+      { label: 'Ha, juda muhim', course: 'none' },
+      { label: 'Shart emas, kompyuterda ham o\'rganish mumkin', course: 'illustrator' },
+    ],
+  },
+];
+
+const QUIZ_RESULTS: Record<Exclude<QuizCourse, 'none'>, { title: string; desc: string; interest: string }> = {
+  photoshop: {
+    title: '🖼️ Adobe Photoshop asoslari',
+    desc: 'Fotosuratlarni qayta ishlash va rastrli grafika dunyosiga kirish.',
+    interest: 'uiux',
+  },
+  illustrator: {
+    title: '✏️ Adobe Illustrator (Vektor)',
+    desc: 'Noldan brending va vektorli san\'at asarlarini yaratish.',
+    interest: 'uiux',
+  },
+  uiux: {
+    title: '🎨 UI/UX Dizayn (Figma)',
+    desc: 'Veb-saytlar va ilovalarning qulay interfeysini loyihalash.',
+    interest: 'uiux',
+  },
+  blender: {
+    title: '🎭 3D Modellashtirish (Blender)',
+    desc: 'Uch o\'lchamli ob\'ektlar va qahramonlar yaratish.',
+    interest: 'animation',
+  },
+};
 
 const INTERESTS = [
   { label: '🎮 Game Development', value: 'game' },
@@ -36,6 +137,7 @@ const LEVELS = [
 
 const WELCOME_BUTTONS = [
   { label: '🎯 Menga mos kurs tavsiya qiling', value: 'recommend' },
+  { label: '🔬 Diagnostik test topshirish', value: 'diagnostic' },
   { label: '📊 Test natijamni tahlil qiling', value: 'test' },
   { label: '❓ Savol bermoqchiman', value: 'question' },
 ];
@@ -78,6 +180,8 @@ export default function ChatBot() {
   const [step, setStep] = useState<Step>('welcome');
   const [userInterest, setUserInterest] = useState('');
   const [hasOpened, setHasOpened] = useState(false);
+  const [quizIndex, setQuizIndex] = useState(0);
+  const [quizScores, setQuizScores] = useState<Record<Exclude<QuizCourse, 'none'>, number>>({ photoshop: 0, illustrator: 0, uiux: 0, blender: 0 });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const addBotMessage = useCallback((
@@ -163,12 +267,66 @@ export default function ChatBot() {
 
     if (value === 'restart') {
       setStep('welcome');
+      setQuizIndex(0);
+      setQuizScores({ photoshop: 0, illustrator: 0, uiux: 0, blender: 0 });
       simulateTyping(() => {
         addBotMessage(
           '🔄 Xo\'p, boshidan boshlaylik! Qanday yordam kerak?',
           WELCOME_BUTTONS
         );
       });
+      return;
+    }
+
+    if (value === 'diagnostic') {
+      setStep('diagnostic_quiz');
+      setQuizIndex(0);
+      setQuizScores({ photoshop: 0, illustrator: 0, uiux: 0, blender: 0 });
+      simulateTyping(() => {
+        const q = QUIZ_QUESTIONS[0];
+        addBotMessage(
+          '🔬 Ajoyib! Sizga mos kursni aniqlash uchun 10 ta savol beraman. Har biriga eng to\'g\'ri deb bilgan javobni tanlang!\n\n' + q.question,
+          q.options.map(o => ({ label: o.label, value: `qa:${o.course}` }))
+        );
+      });
+      return;
+    }
+
+    if (value.startsWith('qa:') && step === 'diagnostic_quiz') {
+      const course = value.slice(3) as QuizCourse;
+      const newScores = { ...quizScores };
+      if (course !== 'none') newScores[course]++;
+      const nextIndex = quizIndex + 1;
+
+      if (nextIndex < QUIZ_QUESTIONS.length) {
+        setQuizIndex(nextIndex);
+        setQuizScores(newScores);
+        const q = QUIZ_QUESTIONS[nextIndex];
+        simulateTyping(() => {
+          addBotMessage(q.question, q.options.map(o => ({ label: o.label, value: `qa:${o.course}` })));
+        });
+      } else {
+        setStep('diagnostic_result');
+        const winner = (Object.entries(newScores) as [Exclude<QuizCourse, 'none'>, number][])
+          .reduce((a, b) => (a[1] >= b[1] ? a : b))[0];
+        const result = QUIZ_RESULTS[winner];
+        simulateTyping(() => {
+          addBotMessage(
+            `🎉 Test yakunlandi! (10/10)\n\n📚 Sizga tavsiya etiladigan kurs:\n\n${result.title}\n\n${result.desc}`,
+            [
+              { label: '🎯 Mos kurslarni ko\'rish', value: `dr:${result.interest}` },
+              { label: '🔄 Boshidan boshlash', value: 'restart' },
+            ]
+          );
+        }, 1200);
+      }
+      return;
+    }
+
+    if (value.startsWith('dr:')) {
+      const interest = value.slice(3);
+      setStep('recommend');
+      handleRecommend(interest);
       return;
     }
 
