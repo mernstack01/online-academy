@@ -496,7 +496,7 @@ export const translations = {
       badge: "Ta'limning kelajagi",
       titlePrefix: 'Ijodiy',
       titleEmphasis: 'salohiyatingizni',
-      titleSuffix: "o'ching",
+      titleSuffix: "oching",
       description:
         "Yuqori samarali kurslarimiz, tajribali mentorlar va o'sishga bag'ishlangan hamjamiyat bilan o'qishning yangi usulini his qiling.",
       exploreCourses: "Kurslarni ko'rish",
