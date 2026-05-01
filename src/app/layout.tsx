@@ -13,8 +13,8 @@ const displayFont = Space_Grotesk({ subsets: ['latin'], variable: '--font-displa
 const bodyFont = Sora({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: "LMS Platform | Learn & Grow",
-  description: "Modern Learning Management System",
+  title: "Grafik Ta'lim | O'rgan & Rivojlan",
+  description: "Grafik dizayn, 3D, UI/UX va AI bo'yicha onlayn ta'lim platformasi",
 };
 
 export default function RootLayout({

@@ -28,10 +28,10 @@ export default function Navbar() {
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center gap-2 group">
                             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform">
-                                A
+                                🎨
                             </div>
                             <span className="text-xl font-bold tracking-tight text-foreground">
-                                Skynet<span className="text-primary">Academy</span>
+                                Grafik<span className="text-primary"> Ta'lim</span>
                             </span>
                         </Link>
                     </div>
