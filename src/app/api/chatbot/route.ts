@@ -80,13 +80,13 @@ export async function POST(req: NextRequest) {
               parts: [
                 {
                   text: language === 'en'
-                    ? `You are the AI assistant of "Skynet Academy" online learning platform.
+                    ? `You are the AI assistant of "Grafik Ta'lim" online learning platform.
 The platform offers courses in: Game Development, 3D Animation, AI & Computer Vision, UI/UX Design.
 Give short, clear and helpful answers in English.
 If the question is not related to the platform or education, politely redirect to the platform.
 
 User question: ${message}`
-                    : `Siz "Skynet Academy" online ta'lim platformasining AI yordamchisisiz.
+                    : `Siz "Grafik Ta'lim" online ta'lim platformasining AI yordamchisisiz.
 Platforma quyidagi yo'nalishlar bo'yicha kurslar taqdim etadi: Game Development, 3D Animatsiya, AI & Computer Vision, UI/UX Dizayn.
 Foydalanuvchilarga qisqa, aniq va foydali javoblar bering. O'zbek tilida javob bering.
 Agar savol platforma yoki ta'lim bilan bog'liq bo'lmasa, muloyimlik bilan platformaga yo'naltiring.

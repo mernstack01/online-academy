@@ -211,7 +211,7 @@ export default function ChatBot() {
       setHasOpened(true);
       simulateTyping(() => {
         addBotMessage(
-          '👋 Salom! Men Skynet Academy\'ning AI yordamchisiman. Sizga qanday yordam bera olaman?',
+          "👋 Salom! Men Grafik Ta'lim ning AI yordamchisiman. Sizga qanday yordam bera olaman?",
           WELCOME_BUTTONS
         );
       }, 400);

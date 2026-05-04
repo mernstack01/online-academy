@@ -11,11 +11,11 @@ export const translations = {
     },
     home: {
       badge: 'Future of Education',
-      titlePrefix: 'Unlock Your',
-      titleEmphasis: 'Creative',
-      titleSuffix: 'Potential',
+      titlePrefix: 'GRAFIK',
+      titleEmphasis: "TA'LIM",
+      titleSuffix: '',
       description:
-        'Experience a new way of learning with our high-impact courses, expert mentors, and a community dedicated to growth.',
+        'A minimal, comfortable learning platform for professional growth and creative development.',
       exploreCourses: 'Explore Courses',
       getStarted: 'Get Started',
       features: {
@@ -494,11 +494,11 @@ export const translations = {
     },
     home: {
       badge: "Ta'limning kelajagi",
-      titlePrefix: 'Ijodiy',
-      titleEmphasis: 'salohiyatingizni',
-      titleSuffix: "oching",
+      titlePrefix: 'GRAFIK',
+      titleEmphasis: "TA'LIM",
+      titleSuffix: '',
       description:
-        "Yuqori samarali kurslarimiz, tajribali mentorlar va o'sishga bag'ishlangan hamjamiyat bilan o'qishning yangi usulini his qiling.",
+        "Kasbiy o'sish va kreativ rivojlanish uchun minimal, qulay o'quv platformasi.",
       exploreCourses: "Kurslarni ko'rish",
       getStarted: 'Boshlash',
       features: {
