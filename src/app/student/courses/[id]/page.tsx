@@ -253,12 +253,12 @@ export default function StudentCourseView() {
                                                 return (
                                                     <label
                                                         key={optIdx}
-                                                        className={`flex items-center gap-3 border border-white/10 rounded-xl px-4 py-3 cursor-pointer transition-all ${
+                                                        className={`flex items-center gap-3 border rounded-xl px-4 py-3 cursor-pointer transition-all ${
                                                             isCorrect
-                                                                ? 'bg-green-500/10 border-green-500/30 text-green-300'
+                                                                ? 'bg-green-50 dark:bg-green-500/15 border-green-400 dark:border-green-500/40'
                                                                 : isWrong
-                                                                ? 'bg-red-500/10 border-red-500/30 text-red-300'
-                                                                : 'hover:bg-white/10'
+                                                                ? 'bg-red-50 dark:bg-red-500/15 border-red-400 dark:border-red-500/40'
+                                                                : 'border-white/10 hover:bg-white/10'
                                                         }`}
                                                     >
                                                         <input
@@ -267,9 +267,27 @@ export default function StudentCourseView() {
                                                             value={optIdx}
                                                             checked={isSelected}
                                                             onChange={() => handleAnswerChange(qKey, optIdx)}
-                                                            className="accent-primary"
+                                                            className="accent-primary shrink-0"
                                                         />
-                                                        <span className="text-sm">{option}</span>
+                                                        <span className={`text-sm font-medium flex-1 ${
+                                                            isCorrect
+                                                                ? 'text-green-700 dark:text-green-300'
+                                                                : isWrong
+                                                                ? 'text-red-700 dark:text-red-300'
+                                                                : ''
+                                                        }`}>
+                                                            {option}
+                                                        </span>
+                                                        {isCorrect && (
+                                                            <span className="text-xs font-bold px-2 py-0.5 bg-green-500 text-white rounded-full shrink-0">
+                                                                ✓ To'g'ri
+                                                            </span>
+                                                        )}
+                                                        {isWrong && (
+                                                            <span className="text-xs font-bold px-2 py-0.5 bg-red-500 text-white rounded-full shrink-0">
+                                                                ✗ Xato
+                                                            </span>
+                                                        )}
                                                     </label>
                                                 );
                                             })}
