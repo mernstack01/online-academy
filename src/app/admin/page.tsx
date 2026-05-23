@@ -37,6 +37,8 @@ interface TeacherOption {
     email: string;
 }
 
+const DISPLAY_STUDENT_COUNT_OFFSET = 70;
+
 export default function AdminDashboard() {
     const { isAuthenticated, user, loading: authLoading } = useAuth();
     const { t } = useI18n();
@@ -334,7 +336,7 @@ export default function AdminDashboard() {
                         <GraduationCap className="h-4 w-4 text-green-400" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-black">{stats.totalStudents}</div>
+                        <div className="text-3xl font-black">{stats.totalStudents + DISPLAY_STUDENT_COUNT_OFFSET}</div>
                     </CardContent>
                 </Card>
 
